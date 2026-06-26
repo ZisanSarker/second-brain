@@ -1,0 +1,14 @@
+node_modules/
+.next/
+dist/
+build/
+.turbo/
+coverage/
+out/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+*.pem
