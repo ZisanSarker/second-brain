@@ -19,9 +19,10 @@ app = FastAPI(
 )
 
 # CORS configuration
+origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this to NestJS api service URL
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -94,4 +95,5 @@ async def search_collection(payload: QueryRequest):
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+    reload_flag = os.getenv("UVICORN_RELOAD", "").lower() in ("1", "true", "yes")
+    uvicorn.run("main:app", host=os.getenv("HOST", "0.0.0.0"), port=port, reload=reload_flag)

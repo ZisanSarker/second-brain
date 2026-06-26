@@ -46,8 +46,8 @@ import { SharedModule } from './shared/shared.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      playground: true,
-      introspection: true,
+      playground: process.env.NODE_ENV !== 'production',
+      introspection: process.env.NODE_ENV !== 'production',
     }),
 
     // Business Modules

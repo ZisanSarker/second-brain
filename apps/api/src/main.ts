@@ -10,15 +10,15 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Compression (before helmet per security best practice)
+  app.use(compression());
+
   // Security headers
   app.use(helmet());
 
-  // Compression
-  app.use(compression());
-
   // Enable CORS
   app.enableCors({
-    origin: '*',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -45,7 +45,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT || 3001;
+  const port = process.env.PORT || process.env.PORT_API || 3001;
   await app.listen(port);
   console.log(`NestJS Server running on http://localhost:${port}`);
   console.log(`OpenAPI Docs available at http://localhost:${port}/api/docs`);

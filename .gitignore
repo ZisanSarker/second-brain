@@ -12,3 +12,7 @@ out/
 !.env.example
 .DS_Store
 *.pem
+
+# Python virtual environments
+.venv/
+apps/ai/.venv/

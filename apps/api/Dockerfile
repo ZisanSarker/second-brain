@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
 # Generate Prisma Client and build the api package
-RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
+RUN pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
 RUN pnpm --filter=api build
 
 FROM base AS runner

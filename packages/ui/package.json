@@ -8,7 +8,11 @@
     "build": "tsc",
     "check-types": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
   "devDependencies": {
+    "react": "^19.0.0",
     "typescript": "^6.0.0"
   }
 }

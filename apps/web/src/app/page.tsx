@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   FolderPlus,
   Search,
@@ -16,6 +15,7 @@ import {
   Plus,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   return (
@@ -40,41 +40,41 @@ export default function DashboardPage() {
 
           {/* Navigation */}
           <nav className="px-4 py-2 space-y-1.5">
-            <a
+            <Link
               href="#"
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 font-medium text-sm transition-all"
             >
-              <BookOpen className="h-4.5 w-4.5" />
+              <BookOpen className="h-[18px] w-[18px]" />
               <span>Knowledge Base</span>
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent hover:border-slate-800/50 font-medium text-sm transition-all"
             >
-              <MessageSquareCode className="h-4.5 w-4.5" />
+              <MessageSquareCode className="h-[18px] w-[18px]" />
               <span>AI Chat Assistant</span>
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent hover:border-slate-800/50 font-medium text-sm transition-all"
             >
-              <Database className="h-4.5 w-4.5" />
+              <Database className="h-[18px] w-[18px]" />
               <span>Vector Stores</span>
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent hover:border-slate-800/50 font-medium text-sm transition-all"
             >
-              <Users className="h-4.5 w-4.5" />
+              <Users className="h-[18px] w-[18px]" />
               <span>Teams & Share</span>
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent hover:border-slate-800/50 font-medium text-sm transition-all"
             >
-              <History className="h-4.5 w-4.5" />
+              <History className="h-[18px] w-[18px]" />
               <span>Activity Log</span>
-            </a>
+            </Link>
           </nav>
         </div>
 
@@ -88,7 +88,7 @@ export default function DashboardPage() {
               <h4 className="text-xs font-semibold text-slate-300 truncate">John Doe</h4>
               <p className="text-[10px] text-slate-500 truncate">john@example.com</p>
             </div>
-            <button className="ml-auto text-slate-500 hover:text-slate-300">
+            <button type="button" className="ml-auto text-slate-500 hover:text-slate-300">
               <Settings className="h-4 w-4" />
             </button>
           </div>
@@ -109,10 +109,16 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700/80 text-xs font-medium transition-all text-slate-300">
+            <button
+              type="button"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700/80 text-xs font-medium transition-all text-slate-300"
+            >
               <span>Workspace: Personal</span>
             </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+            >
               <Plus className="h-3.5 w-3.5" />
               <span>Import</span>
             </button>
@@ -133,7 +139,10 @@ export default function DashboardPage() {
                 transcripts. We&apos;ll chunk, embed, and index them in Qdrant.
               </p>
             </div>
-            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/20 hover:bg-indigo-950/20 text-xs font-semibold text-indigo-400 transition-all shrink-0">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/20 hover:bg-indigo-950/20 text-xs font-semibold text-indigo-400 transition-all shrink-0"
+            >
               <span>View Getting Started Guide</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -253,7 +262,10 @@ export default function DashboardPage() {
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
                     Collections
                   </h3>
-                  <button className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+                  >
                     <Plus className="h-3 w-3" />
                     <span>Create Collection</span>
                   </button>
@@ -335,7 +347,10 @@ export default function DashboardPage() {
                       placeholder="Ask a question..."
                       className="w-full bg-slate-900/80 border border-slate-800 rounded-lg py-2 px-3 pr-10 text-xs text-slate-300 placeholder-slate-600 outline-none focus:border-indigo-500/50 transition-all"
                     />
-                    <button className="absolute right-2 top-2 text-indigo-400 hover:text-indigo-300">
+                    <button
+                      type="button"
+                      className="absolute right-2 top-2 text-indigo-400 hover:text-indigo-300"
+                    >
                       <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>

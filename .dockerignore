@@ -1,0 +1,44 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Node
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+build/
+.turbo/
+coverage/
+out/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App not needed for API build
+apps/web/
+
+# Docs & config
+docs/
+*.md
+AGENTS.md
+
+# Python
+.venv/
