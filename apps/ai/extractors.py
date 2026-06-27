@@ -95,8 +95,11 @@ def extract_image(file_bytes: bytes) -> tuple[str, dict]:
 
 async def extract_website(url: str) -> tuple[str, dict]:
     import trafilatura
+    import concurrent.futures
     try:
-        downloaded = trafilatura.fetch_url(url)
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            future = pool.submit(trafilatura.fetch_url, url)
+            downloaded = future.result(timeout=30)
         if downloaded is None:
             raise ExtractionError(f"Failed to fetch URL: {url}")
         text = trafilatura.extract(downloaded, include_links=True, include_images=False, output_format="txt")
@@ -104,6 +107,8 @@ async def extract_website(url: str) -> tuple[str, dict]:
             raise ExtractionError(f"No readable content found at: {url}")
         metadata = {"source_url": url, "source_type": "website"}
         return text, metadata
+    except concurrent.futures.TimeoutError:
+        raise ExtractionError(f"Timeout fetching URL: {url}")
     except ExtractionError:
         raise
     except Exception as e:
