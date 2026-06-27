@@ -1,8 +1,10 @@
 from __future__ import annotations
+import asyncio
 import logging
 import time
 from typing import Optional
 
+import httpx
 import numpy as np
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
@@ -12,6 +14,26 @@ from config import settings
 from schemas import Chunk, SearchHit
 
 logger = logging.getLogger("ai-service.service")
+
+# --- Retry helper ---
+
+_MAX_RETRIES = 3
+_BASE_DELAY = 0.5
+
+
+async def _retry_async(fn, *args, **kwargs):
+    last_exc = None
+    for attempt in range(_MAX_RETRIES):
+        try:
+            return await fn(*args, **kwargs)
+        except (httpx.HTTPStatusError, httpx.RequestError) as e:
+            last_exc = e
+            if attempt < _MAX_RETRIES - 1:
+                delay = _BASE_DELAY * (2 ** attempt)
+                logger.warning("Retry %d/%d after error: %s — waiting %.1fs", attempt + 1, _MAX_RETRIES, e, delay)
+                await asyncio.sleep(delay)
+    raise last_exc
+
 
 # --- Lazy-loaded singletons ---
 _model: Optional[SentenceTransformer] = None
@@ -46,9 +68,17 @@ def chunk_text(
     chunk_size: int = 500,
     chunk_overlap: int = 50,
 ) -> list[Chunk]:
+    if not text:
+        return []
     import tiktoken
-    encoder = tiktoken.get_encoding("cl100k_base")
-    tokens = encoder.encode(text)
+    try:
+        encoder = tiktoken.get_encoding("cl100k_base")
+    except Exception as e:
+        raise ValueError(f"Failed to load tokenizer: {e}")
+    try:
+        tokens = encoder.encode(text)
+    except Exception as e:
+        raise ValueError(f"Failed to encode text: {e}")
     chunks: list[Chunk] = []
     start = 0
     index = 0
@@ -76,15 +106,23 @@ def chunk_text(
 # --- Embedding ---
 
 def embed_text(text: str) -> list[float]:
-    model = get_embedding_model()
-    vec = model.encode(text, normalize_embeddings=True)
-    return vec.tolist()
+    try:
+        model = get_embedding_model()
+        vec = model.encode(text, normalize_embeddings=True)
+        return vec.tolist()
+    except Exception as e:
+        logger.error("Embedding failed: %s", e)
+        raise
 
 
 def embed_batch(texts: list[str]) -> list[list[float]]:
-    model = get_embedding_model()
-    vecs = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
-    return vecs.tolist()
+    try:
+        model = get_embedding_model()
+        vecs = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+        return vecs.tolist()
+    except Exception as e:
+        logger.error("Batch embedding failed: %s", e)
+        raise
 
 
 # --- Qdrant ---
@@ -94,40 +132,58 @@ COLLECTION_NAME = "chunks"
 
 def ensure_collection():
     client = get_qdrant_client()
-    collections = client.get_collections().collections
-    existing = {c.name for c in collections}
-    if COLLECTION_NAME in existing:
-        logger.info("Qdrant collection '%s' already exists", COLLECTION_NAME)
-        return
-    logger.info("Creating Qdrant collection '%s' (size=%d)", COLLECTION_NAME, settings.embedding_dimension)
-    client.create_collection(
-        collection_name=COLLECTION_NAME,
-        vectors_config=qdrant_models.VectorParams(
-            size=settings.embedding_dimension,
-            distance=qdrant_models.Distance.COSINE,
-        ),
-    )
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="workspace_id",
-        field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
-    )
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="document_id",
-        field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
-    )
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="source_type",
-        field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
-    )
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="tags",
-        field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
-    )
-    logger.info("Qdrant collection '%s' created with indexes", COLLECTION_NAME)
+    for attempt in range(_MAX_RETRIES):
+        try:
+            collections = client.get_collections().collections
+            existing = {c.name for c in collections}
+            if COLLECTION_NAME in existing:
+                logger.info("Qdrant collection '%s' already exists", COLLECTION_NAME)
+                return
+            logger.info("Creating Qdrant collection '%s' (size=%d)", COLLECTION_NAME, settings.embedding_dimension)
+            client.create_collection(
+                collection_name=COLLECTION_NAME,
+                vectors_config=qdrant_models.VectorParams(
+                    size=settings.embedding_dimension,
+                    distance=qdrant_models.Distance.COSINE,
+                ),
+            )
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="workspace_id",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="document_id",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="source_type",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="tags",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="version_id",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="language",
+                field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+            )
+            logger.info("Qdrant collection '%s' created with indexes", COLLECTION_NAME)
+            return
+        except Exception as e:
+            logger.warning("Qdrant connection attempt %d/%d failed: %s", attempt + 1, _MAX_RETRIES, e)
+            if attempt < _MAX_RETRIES - 1:
+                time.sleep(_BASE_DELAY * (2 ** attempt))
+    logger.error("Failed to connect to Qdrant after %d attempts", _MAX_RETRIES)
 
 
 def upsert_chunks(
@@ -141,6 +197,7 @@ def upsert_chunks(
 ):
     if len(chunks) != len(embeddings):
         raise ValueError(f"chunk count ({len(chunks)}) != embedding count ({len(embeddings)})")
+    ensure_collection()
     client = get_qdrant_client()
     base_payload = {
         "workspace_id": workspace_id,
@@ -154,7 +211,7 @@ def upsert_chunks(
         base_payload["language"] = language
     points = []
     for chunk, vector in zip(chunks, embeddings):
-        point_id = f"{document_id}_{chunk.index}"
+        point_id = f"{document_id}_{version_id}_{chunk.index}"
         payload = {
             **base_payload,
             "chunk_index": chunk.index,
@@ -178,17 +235,21 @@ def upsert_chunks(
 
 
 def delete_document_vectors(document_id: str):
-    client = get_qdrant_client()
-    client.delete(
-        collection_name=COLLECTION_NAME,
-        points_selector=qdrant_models.Filter(
-            must=[qdrant_models.FieldCondition(
-                key="document_id",
-                match=qdrant_models.MatchValue(value=document_id),
-            )],
-        ),
-    )
-    logger.info("Deleted vectors for document %s", document_id)
+    try:
+        client = get_qdrant_client()
+        client.delete(
+            collection_name=COLLECTION_NAME,
+            points_selector=qdrant_models.Filter(
+                must=[qdrant_models.FieldCondition(
+                    key="document_id",
+                    match=qdrant_models.MatchValue(value=document_id),
+                )],
+            ),
+        )
+        logger.info("Deleted vectors for document %s", document_id)
+    except Exception as e:
+        logger.error("Failed to delete vectors for document %s: %s", document_id, e)
+        raise
 
 
 def search_chunks(
@@ -255,85 +316,72 @@ def search_chunks(
 
 # --- AI Generation (LLM) ---
 
-import httpx
+_LLM_HEADERS: dict[str, str] = {}
 
-LLM_HEADERS = {}
+
+def _truncate_warn(text: str, max_chars: int, label: str) -> str:
+    if len(text) > max_chars:
+        logger.warning("%s truncated from %d to %d characters", label, len(text), max_chars)
+        return text[:max_chars]
+    return text
+
+
+async def _llm_complete(messages: list[dict], max_tokens: int, timeout: float) -> str:
+    if not settings.llm_api_key:
+        raise RuntimeError("LLM API key not configured")
+    async with httpx.AsyncClient() as client:
+        async def _call():
+            resp = await client.post(
+                f"{settings.llm_base_url}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {settings.llm_api_key}",
+                    **_LLM_HEADERS,
+                },
+                json={
+                    "model": settings.llm_model,
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                },
+                timeout=timeout,
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"].strip()
+        return await _retry_async(_call)
 
 
 async def generate_summary(text: str, max_tokens: int = 300) -> str:
-    if not settings.llm_api_key:
-        raise RuntimeError("LLM API key not configured")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{settings.llm_base_url}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {settings.llm_api_key}",
-                **LLM_HEADERS,
-            },
-            json={
-                "model": settings.llm_model,
-                "messages": [
-                    {"role": "system", "content": "You are a helpful assistant that writes concise document summaries."},
-                    {"role": "user", "content": f"Summarize the following document in {max_tokens} tokens or less:\n\n{text[:8000]}"},
-                ],
-                "max_tokens": max_tokens,
-            },
-            timeout=60,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        return data["choices"][0]["message"]["content"].strip()
+    truncated = _truncate_warn(text, 8000, "Summary input")
+    return await _llm_complete(
+        [
+            {"role": "system", "content": "You are a helpful assistant that writes concise document summaries."},
+            {"role": "user", "content": f"Summarize the following document in {max_tokens} tokens or less:\n\n{truncated}"},
+        ],
+        max_tokens=max_tokens,
+        timeout=60,
+    )
 
 
 async def generate_tags(text: str, max_tokens: int = 100) -> list[str]:
-    if not settings.llm_api_key:
-        raise RuntimeError("LLM API key not configured")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{settings.llm_base_url}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {settings.llm_api_key}",
-                **LLM_HEADERS,
-            },
-            json={
-                "model": settings.llm_model,
-                "messages": [
-                    {"role": "system", "content": "Generate 3-5 relevant tags for the given document. Return only a comma-separated list, no markdown, no numbering."},
-                    {"role": "user", "content": f"Document:\n\n{text[:4000]}"},
-                ],
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        content = data["choices"][0]["message"]["content"].strip()
-        tags = [t.strip() for t in content.split(",") if t.strip()]
-        return tags
+    truncated = _truncate_warn(text, 4000, "Tags input")
+    content = await _llm_complete(
+        [
+            {"role": "system", "content": "Generate 3-5 relevant tags for the given document. Return only a comma-separated list, no markdown, no numbering."},
+            {"role": "user", "content": f"Document:\n\n{truncated}"},
+        ],
+        max_tokens=max_tokens,
+        timeout=30,
+    )
+    return [t.strip() for t in content.split(",") if t.strip()]
 
 
 async def generate_keywords(text: str, max_tokens: int = 100) -> list[str]:
-    if not settings.llm_api_key:
-        raise RuntimeError("LLM API key not configured")
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{settings.llm_base_url}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {settings.llm_api_key}",
-                **LLM_HEADERS,
-            },
-            json={
-                "model": settings.llm_model,
-                "messages": [
-                    {"role": "system", "content": "Extract 5-10 key terms or phrases from the document. Return only a comma-separated list, no markdown, no numbering."},
-                    {"role": "user", "content": f"Document:\n\n{text[:4000]}"},
-                ],
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        content = data["choices"][0]["message"]["content"].strip()
-        keywords = [k.strip() for k in content.split(",") if k.strip()]
-        return keywords
+    truncated = _truncate_warn(text, 4000, "Keywords input")
+    content = await _llm_complete(
+        [
+            {"role": "system", "content": "Extract 5-10 key terms or phrases from the document. Return only a comma-separated list, no markdown, no numbering."},
+            {"role": "user", "content": f"Document:\n\n{truncated}"},
+        ],
+        max_tokens=max_tokens,
+        timeout=30,
+    )
+    return [k.strip() for k in content.split(",") if k.strip()]

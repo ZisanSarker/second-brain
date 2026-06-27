@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -66,7 +67,8 @@ logger = logging.getLogger("ai-service")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting AI service...")
-    ensure_collection()
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, ensure_collection)
     yield
     logger.info("Shutting down AI service...")
 
@@ -102,8 +104,8 @@ async def health_check():
     try:
         get_qdrant_client().get_collections()
         qdrant_ok = True
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Health check: Qdrant unreachable: %s", e)
     return {"status": "healthy", "qdrant": "connected" if qdrant_ok else "unreachable"}
 
 
@@ -197,7 +199,10 @@ async def normalize_endpoint(payload: NormalizeRequest):
 
 @app.post("/api/v1/chunk", tags=["Processing"])
 async def chunk_endpoint(payload: ChunkRequest):
-    chunks = chunk_text(payload.text, chunk_size=payload.config.chunk_size, chunk_overlap=payload.config.chunk_overlap)
+    try:
+        chunks = chunk_text(payload.text, chunk_size=payload.config.chunk_size, chunk_overlap=payload.config.chunk_overlap)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     return ChunkResult(
         chunks=chunks,
         strategy=payload.config.strategy,
@@ -281,7 +286,7 @@ async def generate_summary_endpoint(payload: GenerateRequest):
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    return SummaryResult(summary=summary, model=settings.openrouter_model)
+    return SummaryResult(summary=summary, model=settings.llm_model)
 
 
 @app.post("/api/v1/generate/tags", tags=["AI Generation"])
@@ -292,7 +297,7 @@ async def generate_tags_endpoint(payload: GenerateRequest):
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    return TagsResult(tags=tags, model=settings.openrouter_model)
+    return TagsResult(tags=tags, model=settings.llm_model)
 
 
 @app.post("/api/v1/generate/keywords", tags=["AI Generation"])
@@ -303,7 +308,7 @@ async def generate_keywords_endpoint(payload: GenerateRequest):
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    return KeywordsResult(keywords=keywords, model=settings.openrouter_model)
+    return KeywordsResult(keywords=keywords, model=settings.llm_model)
 
 
 if __name__ == "__main__":
