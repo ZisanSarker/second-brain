@@ -7,10 +7,13 @@ import compression from 'compression';
 
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
+import { validateEnvironment } from './shared/config/env.validation';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const logger = new Logger('Bootstrap');
+  validateEnvironment(logger);
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
   // Compression (before helmet per security best practice)
   app.use(compression());
