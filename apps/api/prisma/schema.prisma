@@ -91,6 +91,9 @@ model User {
   searchHistory    SearchHistory[]
   comments         Comment[]
   refreshTokens    RefreshToken[]
+  documentsOwned   Document[]
+  favorites        Favorite[]
+  recentDocuments  RecentDocument[]
 
   @@index([email])
 }
@@ -175,6 +178,7 @@ model Collection {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   deletedAt   DateTime?
+  archivedAt  DateTime?
   documents   Document[]
 
   @@index([workspaceId])
@@ -196,30 +200,60 @@ model Folder {
 }
 
 model Document {
-  id           String            @id @default(uuid())
-  workspaceId  String
-  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  collectionId String?
-  collection   Collection?       @relation(fields: [collectionId], references: [id], onDelete: SetNull)
-  folderId     String?
-  folder       Folder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  title        String
-  sourceType   ImportType        @default(FILE)
-  status       DocStatus         @default(PENDING_UPLOAD)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  deletedAt    DateTime?
-  versions     DocumentVersion[]
-  tags         Tag[]             @relation("DocumentTags")
-  imports      DocumentImport[]
-  generated    GeneratedContent[]
-  comments     Comment[]
-  files        File[]
-  sharedLinks  SharedLink[]
+  id              String            @id @default(uuid())
+  workspaceId     String
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  collectionId    String?
+  collection      Collection?       @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  folderId        String?
+  folder          Folder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  ownerId         String?
+  owner           User?             @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  title           String
+  originalName    String?
+  fileType        String?
+  mimeType        String?
+  fileSize        BigInt?
+  uploadStatus    String            @default("PENDING")
+  versionNumber   Int               @default(1)
+  sourceType      ImportType        @default(FILE)
+  status          DocStatus         @default(PENDING_UPLOAD)
+  description     String?
+  language        String?
+  author          String?
+  source          String?
+  importedFrom    String?
+  docCreatedAt    DateTime?
+  docModifiedAt   DateTime?
+  pageCount       Int?
+  wordCount       Int?
+  readingTime     Int?
+  lastAccessedAt  DateTime?
+  customMetadata  Json?
+  processingStatus  String          @default("PENDING")
+  parsingStatus     String          @default("PENDING")
+  embeddingStatus   String          @default("PENDING")
+  indexStatus       String          @default("PENDING")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  versions        DocumentVersion[]
+  tags            Tag[]             @relation("DocumentTags")
+  imports         DocumentImport[]
+  generated       GeneratedContent[]
+  comments        Comment[]
+  files           File[]
+  sharedLinks     SharedLink[]
+  recentEntries   RecentDocument[]
 
   @@index([workspaceId])
   @@index([collectionId])
+  @@index([folderId])
+  @@index([ownerId])
   @@index([status])
+  @@index([fileType])
+  @@index([createdAt])
+  @@index([deletedAt])
 }
 
 model DocumentVersion {
@@ -232,6 +266,7 @@ model DocumentVersion {
   fileSize      BigInt
   mimeType      String
   checksum      String
+  metadata      Json?
   createdAt     DateTime        @default(now())
   chunks        DocumentChunk[]
 
@@ -259,9 +294,12 @@ model Tag {
   workspaceId String
   name        String
   color       String     @default("#6B7280")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   documents   Document[] @relation("DocumentTags")
 
   @@unique([workspaceId, name])
+  @@index([workspaceId])
 }
 
 model Conversation {
@@ -471,6 +509,31 @@ model SharedLink {
 
   @@index([token])
   @@index([documentId])
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entityId   String
+  entityType String   // DOCUMENT, COLLECTION, FOLDER
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, entityId, entityType])
+  @@index([userId])
+  @@index([entityId, entityType])
+}
+
+model RecentDocument {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentId      String
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  lastAccessedAt  DateTime @default(now()) @updatedAt
+
+  @@unique([userId, documentId])
+  @@index([userId, lastAccessedAt(sort: Desc)])
 }
 
 model RefreshToken {

@@ -94,14 +94,112 @@ export interface Invitation {
 
 export interface Document {
   id: string;
-  title: string;
-  status: string;
-  sourceType: string;
   workspaceId: string;
   collectionId?: string | null;
   folderId?: string | null;
+  ownerId?: string | null;
+  title: string;
+  originalName?: string | null;
+  fileType?: string | null;
+  mimeType?: string | null;
+  fileSize?: number | null;
+  uploadStatus: string;
+  versionNumber: number;
+  sourceType: string;
+  status: string;
+  description?: string | null;
+  language?: string | null;
+  author?: string | null;
+  source?: string | null;
+  importedFrom?: string | null;
+  pageCount?: number | null;
+  wordCount?: number | null;
+  readingTime?: number | null;
+  lastAccessedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
+  collection?: { id: string; name: string } | null;
+  folder?: { id: string; name: string } | null;
+  owner?: { id: string; name: string | null; email: string } | null;
+  tags?: Tag[];
+  versions?: DocumentVersion[];
+  _count?: { versions: number; comments: number };
+}
+
+export interface DocumentVersion {
+  id: string;
+  documentId: string;
+  versionNumber: number;
+  storageKey: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  checksum?: string | null;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+export interface Collection {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description?: string | null;
+  archivedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  _count?: { documents: number };
+  documents?: Document[];
+}
+
+export interface Folder {
+  id: string;
+  workspaceId: string;
+  parentId?: string | null;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  children?: Folder[];
+  parent?: { id: string; name: string } | null;
+  _count?: { documents: number; children: number };
+}
+
+export interface Tag {
+  id: string;
+  workspaceId: string;
+  name: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { documents: number };
+}
+
+export interface Favorite {
+  id: string;
+  userId: string;
+  entityId: string;
+  entityType: string;
+  createdAt: string;
+  document?: Document | null;
+}
+
+export interface RecentDocument {
+  id: string;
+  userId: string;
+  documentId: string;
+  lastAccessedAt: string;
+  document: Document;
+}
+
+export interface TrashItem {
+  documents: (Document & { tags?: Tag[]; collection?: { id: string; name: string } | null })[];
+  collections: Collection[];
+}
+
+export interface UploadPresignedUrl {
+  url: string;
+  key: string;
 }
 
 export interface PaginatedResponse<T> {
