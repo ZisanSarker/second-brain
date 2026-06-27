@@ -55,52 +55,53 @@ export default function DashboardPage() {
       value: String(memberCount || '—'),
       icon: Users,
       change: `${activeUsers?.length || 0} active now`,
-      changeColor: 'text-emerald-400',
+      changeColor: 'text-success',
     },
     {
       label: 'Recent Activity',
       value: String(summary?.recentActivity ?? '—'),
       icon: Activity,
       change: 'Last 30 days',
-      changeColor: 'text-indigo-400',
+      changeColor: 'text-primary',
     },
     {
       label: 'AI Operations',
       value: String(summary?.recentAiContent ?? '—'),
       icon: Sparkles,
       change: 'Generated this month',
-      changeColor: 'text-purple-400',
+      changeColor: 'text-primary',
     },
     {
       label: 'Comments',
       value: String(summary?.recentComments ?? '—'),
       icon: MessageSquare,
       change: 'This month',
-      changeColor: 'text-blue-400',
+      changeColor: 'text-info',
     },
   ];
 
   return (
     <div className="flex flex-col h-full">
-      <header className="h-16 border-b border-slate-800/50 px-6 flex items-center justify-between bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-40">
+      <header className="h-16 border-b border-border px-6 flex items-center justify-between bg-background/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="flex items-center gap-3 w-full max-w-md">
-          <Search className="h-4 w-4 text-slate-500" />
+          <Search className="h-4 w-4 text-muted-foreground" />
           <input
+            suppressHydrationWarning
             type="text"
             placeholder="Search documents, collections, notes..."
-            className="bg-transparent border-none outline-none text-sm text-slate-300 placeholder-slate-500 w-full"
+            className="bg-transparent border-none outline-none text-sm text-foreground placeholder-muted-foreground w-full"
           />
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/notifications"
-            className="relative rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+            className="relative rounded-lg p-2 text-muted-foreground hover:bg-card hover:text-foreground"
           >
             <Bell size={18} />
           </Link>
           <Link
             href="/upload"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Import</span>
@@ -109,13 +110,13 @@ export default function DashboardPage() {
       </header>
 
       <div className="p-6 max-w-7xl w-full mx-auto space-y-8 flex-1 overflow-auto">
-        <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950 border border-indigo-900/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 h-64 w-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-primary/40 via-primary/20 to-card border border-primary/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-64 w-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
           <div>
-            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
               {currentWorkspace?.name || 'Your Second Brain'}
             </h2>
-            <p className="text-sm text-slate-400 mt-1 max-w-xl">
+            <p className="text-sm text-muted-foreground mt-1 max-w-xl">
               {activeUsers?.length
                 ? `${activeUsers.length} team member${activeUsers.length > 1 ? 's are' : ' is'} active now`
                 : 'Upload, search, and collaborate with your team.'}
@@ -124,14 +125,14 @@ export default function DashboardPage() {
           <div className="flex gap-2">
             <Link
               href="/activity"
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/20 hover:bg-indigo-950/20 text-xs font-semibold text-indigo-400 transition-all shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-popover border border-primary/20 hover:bg-primary/20 text-xs font-semibold text-primary transition-all shrink-0"
             >
               <Activity className="h-3.5 w-3.5" />
               <span>Activity</span>
             </Link>
             <Link
               href="/workspaces"
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/20 hover:bg-indigo-950/20 text-xs font-semibold text-indigo-400 transition-all shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-popover border border-primary/20 hover:bg-primary/20 text-xs font-semibold text-primary transition-all shrink-0"
             >
               <Users className="h-3.5 w-3.5" />
               <span>Members</span>
@@ -140,17 +141,17 @@ export default function DashboardPage() {
         </div>
 
         {invitations.length > 0 && (
-          <div className="rounded-xl border border-amber-900/30 bg-amber-950/20 p-4">
+          <div className="rounded-xl border border-warning/30 bg-warning/20 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Bell size={16} className="text-amber-400" />
-                <span className="text-sm text-amber-300">
+                <Bell size={16} className="text-warning" />
+                <span className="text-sm text-warning">
                   {invitations.length} pending invitation{invitations.length > 1 ? 's' : ''}
                 </span>
               </div>
               <Link
                 href={`/workspaces/${currentWorkspace?.id}/invitations`}
-                className="text-xs text-amber-400 hover:text-amber-300"
+                className="text-xs text-warning hover:text-warning"
               >
                 Manage
               </Link>
@@ -162,16 +163,16 @@ export default function DashboardPage() {
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="glass-panel p-5 rounded-xl border border-slate-900 flex flex-col justify-between h-28 hover:border-slate-800/80 transition-all"
+              className="glass-panel p-5 rounded-xl border border-border flex flex-col justify-between h-28 hover:border-border/80 transition-all"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 font-semibold">{stat.label}</span>
-                <div className="p-1.5 rounded-lg bg-slate-800/80">
-                  <stat.icon className="h-4 w-4 text-indigo-400" />
+                <span className="text-xs text-muted-foreground font-semibold">{stat.label}</span>
+                <div className="p-1.5 rounded-lg bg-card/80">
+                  <stat.icon className="h-4 w-4 text-primary" />
                 </div>
               </div>
               <div className="mt-2">
-                <h3 className="text-2xl font-bold text-slate-200">{stat.value}</h3>
+                <h3 className="text-2xl font-bold text-foreground">{stat.value}</h3>
                 <p className={`text-[10px] ${stat.changeColor} font-medium mt-0.5`}>
                   {stat.change}
                 </p>
@@ -182,17 +183,17 @@ export default function DashboardPage() {
 
         {activeUsers && activeUsers.length > 0 && (
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
               Active Members
             </h3>
             <div className="flex flex-wrap gap-2">
               {activeUsers.map((p: any) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-2 rounded-full bg-zinc-800/50 px-3 py-1.5"
+                  className="flex items-center gap-2 rounded-full bg-card/50 px-3 py-1.5"
                 >
-                  <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                  <span className="text-sm text-zinc-300">{p.user?.name || 'Unknown'}</span>
+                  <div className="h-2 w-2 rounded-full bg-success" />
+                  <span className="text-sm text-foreground">{p.user?.name || 'Unknown'}</span>
                 </div>
               ))}
             </div>
@@ -200,7 +201,7 @@ export default function DashboardPage() {
         )}
 
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">
             Quick Import Sources
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -209,46 +210,46 @@ export default function DashboardPage() {
                 title: 'Local Files',
                 desc: 'PDF, DOCX, Markdown, Images',
                 icon: FolderPlus,
-                color: 'from-blue-600 to-indigo-600',
+                color: 'from-primary to-primary',
                 href: '/upload',
               },
               {
                 title: 'GitHub Repository',
                 desc: 'Sync code branches & wikis',
                 icon: GitBranch,
-                color: 'from-zinc-700 to-slate-900',
+                color: 'from-muted to-card',
                 href: '/imports/github',
               },
               {
                 title: 'YouTube Video',
                 desc: 'Import transcript & metadata',
                 icon: Video,
-                color: 'from-red-600 to-rose-700',
+                color: 'from-destructive to-destructive',
                 href: '/imports/youtube',
               },
               {
                 title: 'Web URL / Website',
                 desc: 'Crawl HTML & extract content',
                 icon: Globe,
-                color: 'from-teal-600 to-emerald-600',
+                color: 'from-success to-success',
                 href: '/imports/website',
               },
             ].map((src, i) => (
               <Link
                 key={i}
                 href={src.href}
-                className="glass-panel p-5 rounded-xl border border-slate-900 glass-panel-hover flex flex-col justify-between h-40 cursor-pointer group"
+                className="glass-panel p-5 rounded-xl border border-border glass-panel-hover flex flex-col justify-between h-40 cursor-pointer group"
               >
                 <div
                   className={`h-10 w-10 rounded-xl bg-gradient-to-tr ${src.color} flex items-center justify-center shadow-lg`}
                 >
-                  <src.icon className="h-5 w-5 text-white" />
+                  <src.icon className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-300 group-hover:text-white transition-all">
+                  <h4 className="text-sm font-semibold text-foreground group-hover:text-foreground transition-all">
                     {src.title}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-1">{src.desc}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{src.desc}</p>
                 </div>
               </Link>
             ))}

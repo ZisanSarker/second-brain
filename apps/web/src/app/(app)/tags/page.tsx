@@ -6,16 +6,16 @@ import { useTags, useCreateTag, useUpdateTag, useDeleteTag } from '@/lib/hooks/u
 import type { Tag } from '@second-brain/types';
 
 const PRESET_COLORS = [
-  '#ef4444',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#14b8a6',
-  '#3b82f6',
-  '#8b5cf6',
-  '#ec4899',
-  '#64748b',
-  '#06b6d4',
+  '#27374D',
+  '#526D82',
+  '#526D82',
+  '#9DB2BF',
+  '#526D82',
+  '#526D82',
+  '#526D82',
+  '#526D82',
+  '#9DB2BF',
+  '#9DB2BF',
 ];
 
 function TagBadge({ tag, size = 'sm' }: { tag: Tag; size?: 'sm' | 'md' }) {
@@ -44,7 +44,7 @@ export default function TagsPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newColor, setNewColor] = useState('#8b5cf6');
+  const [newColor, setNewColor] = useState('#526D82');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
@@ -54,7 +54,7 @@ export default function TagsPage() {
     if (!newName.trim()) return;
     await createTag.mutateAsync({ name: newName.trim(), color: newColor });
     setNewName('');
-    setNewColor('#8b5cf6');
+    setNewColor('#526D82');
     setShowCreate(false);
   };
 
@@ -82,14 +82,14 @@ export default function TagsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="h-16 border-b border-slate-800/50 px-6 flex items-center justify-between bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-40">
+      <header className="h-16 border-b border-border px-6 flex items-center justify-between bg-background/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <Tags className="h-5 w-5 text-indigo-400" />
-          <h1 className="text-sm font-semibold text-slate-200">Tags</h1>
+          <Tags className="h-5 w-5 text-primary" />
+          <h1 className="text-sm font-semibold text-foreground">Tags</h1>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all"
         >
           <Plus className="h-3.5 w-3.5" />
           New Tag
@@ -100,34 +100,35 @@ export default function TagsPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Create Form */}
           {showCreate && (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
+            <div className="glass-panel rounded-xl border border-border p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Create Tag
                 </h2>
                 <button
                   onClick={() => setShowCreate(false)}
-                  className="p-1 rounded-lg hover:bg-slate-800/50"
+                  className="p-1 rounded-lg hover:bg-card/50"
                 >
-                  <X className="h-4 w-4 text-slate-500" />
+                  <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[11px] text-slate-500 font-medium mb-1.5">
+                  <label className="block text-[11px] text-muted-foreground font-medium mb-1.5">
                     Name
                   </label>
                   <input
+                    suppressHydrationWarning
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Tag name"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 focus:outline-none focus:border-purple-500/30 transition-colors"
+                    className="w-full px-3 py-2 rounded-xl bg-popover/50 border border-border text-sm text-foreground focus:outline-none focus:border-primary/30 transition-colors"
                     onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-500 font-medium mb-1.5">
+                  <label className="block text-[11px] text-muted-foreground font-medium mb-1.5">
                     Color
                   </label>
                   <div className="flex items-center gap-3">
@@ -138,7 +139,7 @@ export default function TagsPage() {
                           onClick={() => setNewColor(color)}
                           className={`w-7 h-7 rounded-lg transition-all ${
                             newColor === color
-                              ? 'ring-2 ring-white/40 scale-110'
+                              ? 'ring-2 ring-foreground/40 scale-110'
                               : 'hover:scale-110'
                           }`}
                           style={{ backgroundColor: color }}
@@ -146,6 +147,7 @@ export default function TagsPage() {
                       ))}
                     </div>
                     <input
+                      suppressHydrationWarning
                       type="color"
                       value={newColor}
                       onChange={(e) => setNewColor(e.target.value)}
@@ -155,7 +157,7 @@ export default function TagsPage() {
                 </div>
                 <div className="flex items-center gap-2 justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-slate-500">Preview:</span>
+                    <span className="text-[11px] text-muted-foreground">Preview:</span>
                     <TagBadge
                       tag={{
                         id: 'preview',
@@ -170,14 +172,14 @@ export default function TagsPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowCreate(false)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+                      className="px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleCreate}
                       disabled={!newName.trim() || createTag.isPending}
-                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all disabled:opacity-50"
                     >
                       Create
                     </button>
@@ -189,26 +191,26 @@ export default function TagsPage() {
 
           {/* Delete Confirmation */}
           {confirmDelete && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-              <div className="glass-panel rounded-xl border border-slate-800/60 p-6 w-full max-w-sm mx-4 text-center">
-                <div className="p-2 rounded-xl bg-red-500/10 inline-flex mb-3">
-                  <Trash2 className="h-5 w-5 text-red-400" />
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <div className="glass-panel rounded-xl border border-border p-6 w-full max-w-sm mx-4 text-center">
+                <div className="p-2 rounded-xl bg-destructive/10 inline-flex mb-3">
+                  <Trash2 className="h-5 w-5 text-destructive-foreground" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-200 mb-1">Delete Tag?</h3>
-                <p className="text-xs text-slate-500 mb-4">
+                <h3 className="text-sm font-semibold text-foreground mb-1">Delete Tag?</h3>
+                <p className="text-xs text-muted-foreground mb-4">
                   This tag will be removed from all documents. This action cannot be undone.
                 </p>
                 <div className="flex items-center justify-center gap-2">
                   <button
                     onClick={() => setConfirmDelete(null)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+                    className="px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleDelete(confirmDelete)}
                     disabled={deleteTag.isPending}
-                    className="px-3 py-1.5 rounded-lg bg-red-500 text-xs font-semibold text-white hover:bg-red-600 transition-all disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-lg bg-destructive text-xs font-semibold text-foreground hover:bg-destructive transition-all disabled:opacity-50"
                   >
                     Delete
                   </button>
@@ -223,31 +225,31 @@ export default function TagsPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="glass-panel rounded-xl border border-slate-800/60 p-4 animate-pulse"
+                  className="glass-panel rounded-xl border border-border p-4 animate-pulse"
                 >
-                  <div className="h-5 bg-slate-800/60 rounded w-24" />
+                  <div className="h-5 bg-card/60 rounded w-24" />
                 </div>
               ))}
             </div>
           ) : error ? (
-            <div className="glass-panel rounded-xl border border-red-900/30 p-8 text-center">
-              <div className="p-3 rounded-xl bg-red-500/10 inline-flex mb-3">
-                <X className="h-6 w-6 text-red-400" />
+            <div className="glass-panel rounded-xl border border-destructive/30 p-8 text-center">
+              <div className="p-3 rounded-xl bg-destructive/10 inline-flex mb-3">
+                <X className="h-6 w-6 text-destructive-foreground" />
               </div>
-              <p className="text-sm text-slate-400">Failed to load tags.</p>
+              <p className="text-sm text-muted-foreground">Failed to load tags.</p>
             </div>
           ) : allTags.length === 0 ? (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-12 text-center">
-              <div className="p-3 rounded-xl bg-slate-800/50 inline-flex mb-3">
-                <Tags className="h-6 w-6 text-slate-500" />
+            <div className="glass-panel rounded-xl border border-border p-12 text-center">
+              <div className="p-3 rounded-xl bg-card/50 inline-flex mb-3">
+                <Tags className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-300 mb-1">No tags yet</h3>
-              <p className="text-xs text-slate-500 mb-4">
+              <h3 className="text-sm font-semibold text-foreground mb-1">No tags yet</h3>
+              <p className="text-xs text-muted-foreground mb-4">
                 Create tags to organize and categorize your documents.
               </p>
               <button
                 onClick={() => setShowCreate(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Create Tag
@@ -256,15 +258,16 @@ export default function TagsPage() {
           ) : (
             <div className="space-y-2">
               {allTags.map((tag) => (
-                <div key={tag.id} className="glass-panel rounded-xl border border-slate-800/60 p-4">
+                <div key={tag.id} className="glass-panel rounded-xl border border-border p-4">
                   {editingId === tag.id ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <input
+                          suppressHydrationWarning
                           type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="flex-1 px-3 py-1.5 rounded-lg bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 focus:outline-none focus:border-purple-500/30 transition-colors"
+                          className="flex-1 px-3 py-1.5 rounded-lg bg-popover/50 border border-border text-sm text-foreground focus:outline-none focus:border-primary/30 transition-colors"
                           onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
                         />
                         <div className="flex flex-wrap gap-1">
@@ -274,13 +277,14 @@ export default function TagsPage() {
                               onClick={() => setEditColor(color)}
                               className={`w-6 h-6 rounded-md transition-all ${
                                 editColor === color
-                                  ? 'ring-2 ring-white/40 scale-110'
+                                  ? 'ring-2 ring-foreground/40 scale-110'
                                   : 'hover:scale-110'
                               }`}
                               style={{ backgroundColor: color }}
                             />
                           ))}
                           <input
+                            suppressHydrationWarning
                             type="color"
                             value={editColor}
                             onChange={(e) => setEditColor(e.target.value)}
@@ -290,15 +294,15 @@ export default function TagsPage() {
                         <button
                           onClick={handleSaveEdit}
                           disabled={!editName.trim() || updateTag.isPending}
-                          className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                          className="p-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-all"
                         >
                           <Check className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="p-1.5 rounded-lg hover:bg-slate-800/50 transition-all"
+                          className="p-1.5 rounded-lg hover:bg-card/50 transition-all"
                         >
-                          <X className="h-3.5 w-3.5 text-slate-500" />
+                          <X className="h-3.5 w-3.5 text-muted-foreground" />
                         </button>
                       </div>
                     </div>
@@ -309,9 +313,9 @@ export default function TagsPage() {
                           className="w-3 h-3 rounded-full shrink-0"
                           style={{ backgroundColor: tag.color }}
                         />
-                        <span className="text-sm font-medium text-slate-200">{tag.name}</span>
+                        <span className="text-sm font-medium text-foreground">{tag.name}</span>
                         {tag._count?.documents != null && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-slate-800/80 text-[10px] font-mono text-slate-500">
+                          <span className="px-1.5 py-0.5 rounded-md bg-card/80 text-[10px] font-mono text-muted-foreground">
                             {tag._count.documents} docs
                           </span>
                         )}
@@ -319,15 +323,15 @@ export default function TagsPage() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleStartEdit(tag)}
-                          className="p-1.5 rounded-lg hover:bg-slate-800/50 transition-all"
+                          className="p-1.5 rounded-lg hover:bg-card/50 transition-all"
                         >
-                          <Pencil className="h-3.5 w-3.5 text-slate-500" />
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                         </button>
                         <button
                           onClick={() => setConfirmDelete(tag.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-500/10 transition-all"
+                          className="p-1.5 rounded-lg hover:bg-destructive/10 transition-all"
                         >
-                          <Trash2 className="h-3.5 w-3.5 text-slate-500 hover:text-red-400" />
+                          <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive-foreground" />
                         </button>
                       </div>
                     </div>

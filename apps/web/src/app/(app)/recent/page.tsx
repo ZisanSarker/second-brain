@@ -111,10 +111,10 @@ export default function RecentPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="h-16 border-b border-slate-800/50 px-6 flex items-center bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-40">
+      <header className="h-16 border-b border-border px-6 flex items-center bg-background/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <Clock className="h-5 w-5 text-indigo-400" />
-          <h1 className="text-sm font-semibold text-slate-200">Recent</h1>
+          <Clock className="h-5 w-5 text-primary" />
+          <h1 className="text-sm font-semibold text-foreground">Recent</h1>
         </div>
       </header>
 
@@ -124,18 +124,18 @@ export default function RecentPage() {
             <div className="space-y-6">
               {Array.from({ length: 3 }).map((_, gi) => (
                 <div key={gi}>
-                  <div className="h-5 bg-slate-800/60 rounded w-24 mb-3 animate-pulse" />
+                  <div className="h-5 bg-card/60 rounded w-24 mb-3 animate-pulse" />
                   <div className="space-y-2">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div
                         key={i}
-                        className="glass-panel rounded-xl border border-slate-800/60 p-4 animate-pulse"
+                        className="glass-panel rounded-xl border border-border p-4 animate-pulse"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-slate-800/60" />
+                          <div className="h-10 w-10 rounded-xl bg-card/60" />
                           <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-slate-800/60 rounded w-1/2" />
-                            <div className="h-3 bg-slate-800/60 rounded w-1/3" />
+                            <div className="h-4 bg-card/60 rounded w-1/2" />
+                            <div className="h-3 bg-card/60 rounded w-1/3" />
                           </div>
                         </div>
                       </div>
@@ -145,19 +145,19 @@ export default function RecentPage() {
               ))}
             </div>
           ) : error ? (
-            <div className="glass-panel rounded-xl border border-red-900/30 p-8 text-center">
-              <div className="p-3 rounded-xl bg-red-500/10 inline-flex mb-3">
-                <X className="h-6 w-6 text-red-400" />
+            <div className="glass-panel rounded-xl border border-destructive/30 p-8 text-center">
+              <div className="p-3 rounded-xl bg-destructive/10 inline-flex mb-3">
+                <X className="h-6 w-6 text-destructive-foreground" />
               </div>
-              <p className="text-sm text-slate-400">Failed to load recent documents.</p>
+              <p className="text-sm text-muted-foreground">Failed to load recent documents.</p>
             </div>
           ) : allRecent.length === 0 ? (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-12 text-center">
-              <div className="p-3 rounded-xl bg-slate-800/50 inline-flex mb-3">
-                <Clock className="h-6 w-6 text-slate-500" />
+            <div className="glass-panel rounded-xl border border-border p-12 text-center">
+              <div className="p-3 rounded-xl bg-card/50 inline-flex mb-3">
+                <Clock className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-300 mb-1">No recent documents</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-semibold text-foreground mb-1">No recent documents</h3>
+              <p className="text-xs text-muted-foreground">
                 Documents you view will appear here for quick access.
               </p>
             </div>
@@ -171,11 +171,11 @@ export default function RecentPage() {
                 return (
                   <div key={group}>
                     <div className="flex items-center gap-2 mb-3">
-                      <GroupIcon className="h-4 w-4 text-slate-500" />
-                      <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <GroupIcon className="h-4 w-4 text-muted-foreground" />
+                      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {label}
                       </h2>
-                      <span className="text-[10px] text-slate-600">({items.length})</span>
+                      <span className="text-[10px] text-muted-foreground">({items.length})</span>
                     </div>
                     <div className="space-y-2">
                       {items.map((item) => {
@@ -183,32 +183,32 @@ export default function RecentPage() {
                         const Icon = getFileIcon(doc.fileType);
                         return (
                           <Link key={item.id} href={`/documents/${doc.id}`}>
-                            <div className="glass-panel rounded-xl border border-slate-800/60 p-4 glass-panel-hover group cursor-pointer">
+                            <div className="glass-panel rounded-xl border border-border p-4 glass-panel-hover group cursor-pointer">
                               <div className="flex items-center gap-4">
-                                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/10 shrink-0">
-                                  <Icon className="h-5 w-5 text-indigo-400" />
+                                <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/10 border border-primary/10 shrink-0">
+                                  <Icon className="h-5 w-5 text-primary" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-semibold text-slate-200 truncate group-hover:text-white transition-colors">
+                                    <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-foreground transition-colors">
                                       {doc.title}
                                     </h3>
-                                    <ChevronRight className="h-4 w-4 text-slate-600 opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-2" />
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-2" />
                                   </div>
-                                  <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500">
+                                  <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
                                     <span className="flex items-center gap-1">
                                       <Clock className="h-3 w-3" />
                                       {formatTime(item.lastAccessedAt)}
                                     </span>
                                     {doc.fileType && (
                                       <>
-                                        <span className="text-slate-700">·</span>
+                                        <span className="text-muted-foreground">·</span>
                                         <span className="uppercase">{doc.fileType}</span>
                                       </>
                                     )}
                                     {doc.fileSize && (
                                       <>
-                                        <span className="text-slate-700">·</span>
+                                        <span className="text-muted-foreground">·</span>
                                         <span>{formatFileSize(doc.fileSize)}</span>
                                       </>
                                     )}

@@ -38,26 +38,26 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-slate-400 mt-1">Customize your experience</p>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-muted-foreground mt-1">Customize your experience</p>
       </div>
 
       <form onSubmit={handleSave} className="glass-panel rounded-2xl p-8 space-y-6">
         {message && (
-          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-slate-300">
+          <div className="p-3 rounded-lg bg-card/50 border border-border text-sm text-foreground">
             {message}
           </div>
         )}
 
         <div>
-          <label htmlFor="theme" className="block text-sm font-medium text-slate-300 mb-2">
+          <label htmlFor="theme" className="block text-sm font-medium text-foreground mb-2">
             Theme
           </label>
           <select
             id="theme"
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+            className="w-full px-4 py-2.5 rounded-xl bg-popover/50 border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-primary/50 transition-all"
           >
             <option value="dark">Dark</option>
             <option value="light">Light</option>
@@ -66,14 +66,14 @@ export default function SettingsPage() {
         </div>
 
         <div>
-          <label htmlFor="language" className="block text-sm font-medium text-slate-300 mb-2">
+          <label htmlFor="language" className="block text-sm font-medium text-foreground mb-2">
             Language
           </label>
           <select
             id="language"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+            className="w-full px-4 py-2.5 rounded-xl bg-popover/50 border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-primary/50 transition-all"
           >
             <option value="en">English</option>
           </select>
@@ -82,7 +82,7 @@ export default function SettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-foreground font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save Settings'}

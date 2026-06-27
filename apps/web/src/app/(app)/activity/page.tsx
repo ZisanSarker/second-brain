@@ -24,11 +24,11 @@ const iconMap: Record<string, any> = {
 };
 
 const colorMap: Record<string, string> = {
-  DOCUMENT_CREATED: 'text-blue-400 bg-blue-500/10',
-  DOCUMENT_UPDATED: 'text-amber-400 bg-amber-500/10',
-  COMMENT_ADDED: 'text-emerald-400 bg-emerald-500/10',
-  MEMBER_JOINED: 'text-green-400 bg-green-500/10',
-  AI_TASK_COMPLETED: 'text-purple-400 bg-purple-500/10',
+  DOCUMENT_CREATED: 'text-info bg-info/10',
+  DOCUMENT_UPDATED: 'text-warning bg-warning/10',
+  COMMENT_ADDED: 'text-success bg-success/10',
+  MEMBER_JOINED: 'text-success bg-success/10',
+  AI_TASK_COMPLETED: 'text-primary bg-primary/10',
 };
 
 export default function ActivityPage() {
@@ -40,8 +40,10 @@ export default function ActivityPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-100">Activity Feed</h1>
-        <p className="mt-1 text-sm text-zinc-400">Chronological timeline of workspace activity</p>
+        <h1 className="text-2xl font-bold text-foreground">Activity Feed</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Chronological timeline of workspace activity
+        </p>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -52,8 +54,8 @@ export default function ActivityPage() {
               onClick={() => setTypeFilter(t || undefined)}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
                 (t === '' && !typeFilter) || t === typeFilter
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                  ? 'bg-primary text-foreground'
+                  : 'bg-card text-muted-foreground hover:bg-muted'
               }`}
             >
               {t || 'All'}
@@ -64,32 +66,32 @@ export default function ActivityPage() {
 
       <div className="space-y-3">
         {items.length === 0 && (
-          <p className="py-12 text-center text-sm text-zinc-500">No activity yet</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">No activity yet</p>
         )}
         {items.map((a: any) => {
           const Icon = iconMap[a.type] || Activity;
-          const color = colorMap[a.type] || 'text-zinc-400 bg-zinc-500/10';
+          const color = colorMap[a.type] || 'text-muted-foreground bg-muted/10';
           return (
             <div
               key={a.id}
-              className="flex items-start gap-3 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4"
+              className="flex items-start gap-3 rounded-lg border border-border bg-popover/30 p-4"
             >
               <div className={`rounded-full p-2 ${color}`}>
                 <Icon size={16} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-200">
+                  <span className="text-sm font-medium text-foreground">
                     {a.user?.name || 'System'}
                   </span>
-                  <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                  <span className="rounded bg-card px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     {a.type}
                   </span>
                 </div>
                 {a.metadata?.text && (
-                  <p className="mt-0.5 text-sm text-zinc-400">{a.metadata.text}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{a.metadata.text}</p>
                 )}
-                <p className="mt-1 text-[10px] text-zinc-600">
+                <p className="mt-1 text-[10px] text-muted-foreground">
                   {new Date(a.createdAt).toLocaleString()}
                 </p>
               </div>

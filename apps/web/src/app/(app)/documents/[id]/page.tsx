@@ -108,13 +108,15 @@ function MetaRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-slate-800/30 last:border-0">
-      <div className="p-1.5 rounded-lg bg-slate-800/50 shrink-0">
-        <Icon className="h-3.5 w-3.5 text-slate-500" />
+    <div className="flex items-center gap-3 py-2.5 border-b border-border/30 last:border-0">
+      <div className="p-1.5 rounded-lg bg-card/50 shrink-0">
+        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">{label}</p>
-        <p className="text-sm text-slate-200 truncate">{value}</p>
+        <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          {label}
+        </p>
+        <p className="text-sm text-foreground truncate">{value}</p>
       </div>
     </div>
   );
@@ -194,10 +196,10 @@ export default function DocumentDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="glass-panel rounded-xl border border-slate-800/60 p-8 animate-pulse space-y-4 w-full max-w-3xl mx-6">
-          <div className="h-8 bg-slate-800/60 rounded w-2/3" />
-          <div className="h-4 bg-slate-800/60 rounded w-1/3" />
-          <div className="h-32 bg-slate-800/60 rounded" />
+        <div className="glass-panel rounded-xl border border-border p-8 animate-pulse space-y-4 w-full max-w-3xl mx-6">
+          <div className="h-8 bg-card/60 rounded w-2/3" />
+          <div className="h-4 bg-card/60 rounded w-1/3" />
+          <div className="h-32 bg-card/60 rounded" />
         </div>
       </div>
     );
@@ -206,17 +208,17 @@ export default function DocumentDetailPage() {
   if (error || !doc) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="glass-panel rounded-xl border border-red-900/30 p-8 text-center max-w-md">
-          <div className="p-3 rounded-xl bg-red-500/10 inline-flex mb-3">
-            <X className="h-6 w-6 text-red-400" />
+        <div className="glass-panel rounded-xl border border-destructive/30 p-8 text-center max-w-md">
+          <div className="p-3 rounded-xl bg-destructive/10 inline-flex mb-3">
+            <X className="h-6 w-6 text-destructive-foreground" />
           </div>
-          <h3 className="text-sm font-semibold text-slate-300 mb-1">Document not found</h3>
-          <p className="text-xs text-slate-500 mb-4">
+          <h3 className="text-sm font-semibold text-foreground mb-1">Document not found</h3>
+          <p className="text-xs text-muted-foreground mb-4">
             This document may have been deleted or you don't have access.
           </p>
           <button
             onClick={() => router.push('/documents')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Documents
@@ -230,20 +232,20 @@ export default function DocumentDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="h-16 border-b border-slate-800/50 px-6 flex items-center justify-between bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-40">
+      <header className="h-16 border-b border-border px-6 flex items-center justify-between bg-background/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/documents')}
-            className="p-1.5 rounded-lg hover:bg-slate-800/50 transition-all"
+            className="p-1.5 rounded-lg hover:bg-card/50 transition-all"
           >
-            <ArrowLeft className="h-4 w-4 text-slate-400" />
+            <ArrowLeft className="h-4 w-4 text-muted-foreground" />
           </button>
-          <div className="p-1.5 rounded-lg bg-indigo-500/10">
-            <Icon className="h-4 w-4 text-indigo-400" />
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" />
           </div>
-          <h1 className="text-sm font-semibold text-slate-200 truncate max-w-md">{doc.title}</h1>
+          <h1 className="text-sm font-semibold text-foreground truncate max-w-md">{doc.title}</h1>
           {doc.fileType && (
-            <span className="px-2 py-0.5 rounded-md bg-slate-800/80 text-[10px] font-mono font-semibold text-slate-400 uppercase">
+            <span className="px-2 py-0.5 rounded-md bg-card/80 text-[10px] font-mono font-semibold text-muted-foreground uppercase">
               {doc.fileType}
             </span>
           )}
@@ -251,14 +253,14 @@ export default function DocumentDetailPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowShare(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
           >
             <Share2 className="h-3.5 w-3.5" />
             Share
           </button>
           <button
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
           >
             <MessageSquare className="h-3.5 w-3.5" />
             Comments
@@ -266,7 +268,7 @@ export default function DocumentDetailPage() {
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
             {downloading ? 'Preparing...' : 'Download'}
@@ -276,14 +278,14 @@ export default function DocumentDetailPage() {
               <button
                 onClick={saveEdit}
                 disabled={updateDocument.isPending}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all disabled:opacity-50"
               >
                 <Save className="h-3.5 w-3.5" />
                 Save
               </button>
               <button
                 onClick={() => setIsEditing(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
               >
                 <X className="h-3.5 w-3.5" />
                 Cancel
@@ -292,7 +294,7 @@ export default function DocumentDetailPage() {
           ) : (
             <button
               onClick={startEditing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
             >
               <Edit3 className="h-3.5 w-3.5" />
               Edit
@@ -315,54 +317,59 @@ export default function DocumentDetailPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Edit Form */}
           {isEditing ? (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-6 space-y-4">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="glass-panel rounded-xl border border-border p-6 space-y-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Edit Metadata
               </h2>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[11px] text-slate-500 font-medium mb-1">Title</label>
+                  <label className="block text-[11px] text-muted-foreground font-medium mb-1">
+                    Title
+                  </label>
                   <input
+                    suppressHydrationWarning
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 focus:outline-none focus:border-purple-500/30 transition-colors"
+                    className="w-full px-3 py-2 rounded-xl bg-popover/50 border border-border text-sm text-foreground focus:outline-none focus:border-primary/30 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-500 font-medium mb-1">
+                  <label className="block text-[11px] text-muted-foreground font-medium mb-1">
                     Description
                   </label>
                   <textarea
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 focus:outline-none focus:border-purple-500/30 transition-colors resize-none"
+                    className="w-full px-3 py-2 rounded-xl bg-popover/50 border border-border text-sm text-foreground focus:outline-none focus:border-primary/30 transition-colors resize-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] text-slate-500 font-medium mb-1">
+                    <label className="block text-[11px] text-muted-foreground font-medium mb-1">
                       Language
                     </label>
                     <input
+                      suppressHydrationWarning
                       type="text"
                       value={editLanguage}
                       onChange={(e) => setEditLanguage(e.target.value)}
                       placeholder="e.g. en, ja"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 focus:outline-none focus:border-purple-500/30 transition-colors"
+                      className="w-full px-3 py-2 rounded-xl bg-popover/50 border border-border text-sm text-foreground focus:outline-none focus:border-primary/30 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-slate-500 font-medium mb-1">
+                    <label className="block text-[11px] text-muted-foreground font-medium mb-1">
                       Author
                     </label>
                     <input
+                      suppressHydrationWarning
                       type="text"
                       value={editAuthor}
                       onChange={(e) => setEditAuthor(e.target.value)}
                       placeholder="Author name"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-200 focus:outline-none focus:border-purple-500/30 transition-colors"
+                      className="w-full px-3 py-2 rounded-xl bg-popover/50 border border-border text-sm text-foreground focus:outline-none focus:border-primary/30 transition-colors"
                     />
                   </div>
                 </div>
@@ -372,8 +379,8 @@ export default function DocumentDetailPage() {
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+            <div className="glass-panel rounded-xl border border-border p-5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                 File Information
               </h2>
               <div className="space-y-0">
@@ -394,8 +401,8 @@ export default function DocumentDetailPage() {
               </div>
             </div>
 
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+            <div className="glass-panel rounded-xl border border-border p-5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                 Dates & Relations
               </h2>
               <div className="space-y-0">
@@ -424,18 +431,18 @@ export default function DocumentDetailPage() {
 
           {/* Description */}
           {doc.description && (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            <div className="glass-panel rounded-xl border border-border p-5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                 Description
               </h2>
-              <p className="text-sm text-slate-300 leading-relaxed">{doc.description}</p>
+              <p className="text-sm text-foreground leading-relaxed">{doc.description}</p>
             </div>
           )}
 
           {/* Tags */}
           {doc.tags && doc.tags.length > 0 && (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+            <div className="glass-panel rounded-xl border border-border p-5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                 Tags
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -459,9 +466,9 @@ export default function DocumentDetailPage() {
 
           {/* Processing Status */}
           {processing?.document && (
-            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
+            <div className="glass-panel rounded-xl border border-border p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Processing Status
                 </h2>
                 {(processing.document as { processingStatus?: string }).processingStatus ===
@@ -469,7 +476,7 @@ export default function DocumentDetailPage() {
                   <button
                     onClick={() => retryProcessing.mutate(id)}
                     disabled={retryProcessing.isPending}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 text-[11px] font-medium text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-destructive/10 text-[11px] font-medium text-destructive-foreground hover:bg-destructive/20 transition-all disabled:opacity-50"
                   >
                     Retry
                   </button>
@@ -500,28 +507,30 @@ export default function DocumentDetailPage() {
                       key={key}
                       className={`p-3 rounded-xl border text-center ${
                         isDone
-                          ? 'bg-green-500/5 border-green-500/20'
+                          ? 'bg-success/5 border-success/20'
                           : isFailed
-                            ? 'bg-red-500/5 border-red-500/20'
+                            ? 'bg-destructive/5 border-destructive/20'
                             : isActive
-                              ? 'bg-amber-500/5 border-amber-500/20'
-                              : 'bg-slate-900/30 border-slate-800/30'
+                              ? 'bg-warning/5 border-warning/20'
+                              : 'bg-popover/30 border-border/30'
                       }`}
                     >
-                      <p className="text-[10px] font-medium text-slate-500 mb-1">{labels[key]}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground mb-1">
+                        {labels[key]}
+                      </p>
                       <span
                         className={`inline-flex items-center gap-1 text-xs font-semibold ${
                           isDone
-                            ? 'text-green-400'
+                            ? 'text-success'
                             : isFailed
-                              ? 'text-red-400'
+                              ? 'text-destructive-foreground'
                               : isActive
-                                ? 'text-amber-400'
-                                : 'text-slate-500'
+                                ? 'text-warning'
+                                : 'text-muted-foreground'
                         }`}
                       >
                         {isActive && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-warning animate-pulse" />
                         )}
                         {value}
                       </span>
@@ -533,45 +542,45 @@ export default function DocumentDetailPage() {
           )}
 
           {/* Version History */}
-          <div className="glass-panel rounded-xl border border-slate-800/60">
+          <div className="glass-panel rounded-xl border border-border">
             <button
               onClick={() => setShowVersions(!showVersions)}
               className="w-full flex items-center justify-between p-5"
             >
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-indigo-400" />
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <Clock className="h-4 w-4 text-primary" />
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Version History
                 </h2>
                 {versions && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-slate-800/80 text-[10px] font-mono text-slate-400">
+                  <span className="px-1.5 py-0.5 rounded-md bg-card/80 text-[10px] font-mono text-muted-foreground">
                     {versions.length}
                   </span>
                 )}
               </div>
               {showVersions ? (
-                <ChevronUp className="h-4 w-4 text-slate-500" />
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <ChevronDown className="h-4 w-4 text-slate-500" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               )}
             </button>
             {showVersions && (
-              <div className="px-5 pb-5 border-t border-slate-800/50 pt-4 space-y-3">
+              <div className="px-5 pb-5 border-t border-border pt-4 space-y-3">
                 {versions && versions.length > 0 ? (
                   versions.map((version: DocumentVersion) => (
                     <div
                       key={version.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-slate-900/30 border border-slate-800/30"
+                      className="flex items-center justify-between p-3 rounded-xl bg-popover/30 border border-border/30"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-1.5 rounded-lg bg-indigo-500/10 shrink-0">
-                          <Layers className="h-3.5 w-3.5 text-indigo-400" />
+                        <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+                          <Layers className="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-200">
+                          <p className="text-sm font-medium text-foreground">
                             v{version.versionNumber}
                           </p>
-                          <p className="text-[11px] text-slate-500">
+                          <p className="text-[11px] text-muted-foreground">
                             {formatRelativeTime(version.createdAt)} —{' '}
                             {formatFileSize(version.fileSize)}
                           </p>
@@ -580,7 +589,7 @@ export default function DocumentDetailPage() {
                       <button
                         onClick={() => handleRestoreVersion(version.id)}
                         disabled={restoreVersion.isPending}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/50 text-[11px] font-medium text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50 shrink-0"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-card/50 text-[11px] font-medium text-foreground hover:bg-muted/50 transition-all disabled:opacity-50 shrink-0"
                       >
                         <RotateCcw className="h-3 w-3" />
                         Restore
@@ -588,7 +597,7 @@ export default function DocumentDetailPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-slate-500 text-center py-4">
+                  <p className="text-sm text-muted-foreground text-center py-4">
                     No version history available.
                   </p>
                 )}

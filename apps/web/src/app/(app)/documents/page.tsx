@@ -72,31 +72,31 @@ function formatDate(dateStr?: string | null) {
 function statusBadge(status?: string | null) {
   if (!status || status === 'COMPLETED' || status === 'READY') return null;
   const colors: Record<string, { bg: string; text: string; dot: string }> = {
-    PENDING: { bg: 'bg-slate-800/60', text: 'text-slate-400', dot: 'bg-slate-500' },
-    PENDING_UPLOAD: { bg: 'bg-slate-800/60', text: 'text-slate-400', dot: 'bg-slate-500' },
-    QUEUED: { bg: 'bg-blue-900/30', text: 'text-blue-400', dot: 'bg-blue-400' },
+    PENDING: { bg: 'bg-card/60', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
+    PENDING_UPLOAD: { bg: 'bg-card/60', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
+    QUEUED: { bg: 'bg-info/30', text: 'text-info', dot: 'bg-info' },
     PROCESSING: {
-      bg: 'bg-amber-900/30',
-      text: 'text-amber-400',
-      dot: 'bg-amber-400 animate-pulse',
+      bg: 'bg-warning/30',
+      text: 'text-warning',
+      dot: 'bg-warning animate-pulse',
     },
     EXTRACTING: {
-      bg: 'bg-amber-900/30',
-      text: 'text-amber-400',
-      dot: 'bg-amber-400 animate-pulse',
+      bg: 'bg-warning/30',
+      text: 'text-warning',
+      dot: 'bg-warning animate-pulse',
     },
-    CHUNKING: { bg: 'bg-amber-900/30', text: 'text-amber-400', dot: 'bg-amber-400 animate-pulse' },
+    CHUNKING: { bg: 'bg-warning/30', text: 'text-warning', dot: 'bg-warning animate-pulse' },
     EMBEDDING: {
-      bg: 'bg-purple-900/30',
-      text: 'text-purple-400',
-      dot: 'bg-purple-400 animate-pulse',
+      bg: 'bg-primary/30',
+      text: 'text-primary',
+      dot: 'bg-primary animate-pulse',
     },
     INDEXING: {
-      bg: 'bg-purple-900/30',
-      text: 'text-purple-400',
-      dot: 'bg-purple-400 animate-pulse',
+      bg: 'bg-primary/30',
+      text: 'text-primary',
+      dot: 'bg-primary animate-pulse',
     },
-    FAILED: { bg: 'bg-red-900/30', text: 'text-red-400', dot: 'bg-red-400' },
+    FAILED: { bg: 'bg-destructive/30', text: 'text-destructive-foreground', dot: 'bg-destructive' },
   };
   const c = colors[status] || colors.PENDING;
   return (
@@ -114,36 +114,36 @@ function DocumentCard({ doc }: { doc: Document }) {
   const processingStatus = doc.processingStatus || (doc.status !== 'READY' ? doc.status : null);
   return (
     <Link href={`/documents/${doc.id}`}>
-      <div className="glass-panel rounded-xl border border-slate-800/60 p-4 h-full glass-panel-hover cursor-pointer group">
+      <div className="glass-panel rounded-xl border border-border p-4 h-full glass-panel-hover cursor-pointer group">
         <div className="flex items-start justify-between mb-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/10">
-            <Icon className="h-5 w-5 text-indigo-400" />
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/10 border border-primary/10">
+            <Icon className="h-5 w-5 text-primary" />
           </div>
           <div className="flex items-center gap-1.5">
             {doc.fileType && (
-              <span className="px-2 py-0.5 rounded-md bg-slate-800/80 text-[10px] font-mono font-semibold text-slate-400 uppercase">
+              <span className="px-2 py-0.5 rounded-md bg-card/80 text-[10px] font-mono font-semibold text-muted-foreground uppercase">
                 {doc.fileType}
               </span>
             )}
             {statusBadge(processingStatus)}
             <button
               type="button"
-              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-800/50"
+              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-card/50"
             >
-              <MoreHorizontal className="h-3.5 w-3.5 text-slate-500" />
+              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
         </div>
 
-        <h3 className="text-sm font-semibold text-slate-200 mb-2 line-clamp-2 group-hover:text-white transition-colors">
+        <h3 className="text-sm font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-foreground transition-colors">
           {doc.title}
         </h3>
 
         <div className="space-y-1.5 mt-auto">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <HardDrive className="h-3 w-3" />
             <span>{formatFileSize(doc.fileSize)}</span>
-            <span className="text-slate-700">·</span>
+            <span className="text-muted-foreground">·</span>
             <Calendar className="h-3 w-3" />
             <span>{formatDate(doc.createdAt)}</span>
           </div>
@@ -164,7 +164,7 @@ function DocumentCard({ doc }: { doc: Document }) {
                 </span>
               ))}
               {doc.tags.length > 3 && (
-                <span className="text-[10px] text-slate-500">+{doc.tags.length - 3}</span>
+                <span className="text-[10px] text-muted-foreground">+{doc.tags.length - 3}</span>
               )}
             </div>
           )}
@@ -178,14 +178,11 @@ function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div
-          key={i}
-          className="glass-panel rounded-xl border border-slate-800/60 p-4 animate-pulse"
-        >
-          <div className="h-10 w-10 rounded-xl bg-slate-800/60 mb-3" />
-          <div className="h-4 bg-slate-800/60 rounded w-3/4 mb-2" />
-          <div className="h-3 bg-slate-800/60 rounded w-1/2 mb-3" />
-          <div className="h-3 bg-slate-800/60 rounded w-2/3" />
+        <div key={i} className="glass-panel rounded-xl border border-border p-4 animate-pulse">
+          <div className="h-10 w-10 rounded-xl bg-card/60 mb-3" />
+          <div className="h-4 bg-card/60 rounded w-3/4 mb-2" />
+          <div className="h-3 bg-card/60 rounded w-1/2 mb-3" />
+          <div className="h-3 bg-card/60 rounded w-2/3" />
         </div>
       ))}
     </div>
@@ -228,16 +225,16 @@ export default function DocumentsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="h-16 border-b border-slate-800/50 px-6 flex items-center justify-between bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-40">
+      <header className="h-16 border-b border-border px-6 flex items-center justify-between bg-background/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <FileText className="h-5 w-5 text-indigo-400" />
-          <h1 className="text-sm font-semibold text-slate-200">Documents</h1>
+          <FileText className="h-5 w-5 text-primary" />
+          <h1 className="text-sm font-semibold text-foreground">Documents</h1>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <button
               onClick={() => setImportOpen(!importOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card/50 text-xs font-semibold text-foreground hover:bg-muted/50 transition-all"
             >
               <Globe className="h-3.5 w-3.5" />
               Import
@@ -248,29 +245,29 @@ export default function DocumentsPage() {
             {importOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setImportOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-20 glass-panel rounded-xl py-1 border border-slate-700/50 min-w-[180px]">
+                <div className="absolute right-0 top-full mt-1 z-20 glass-panel rounded-xl py-1 border border-border min-w-[180px]">
                   <Link
                     href="/imports/website"
                     onClick={() => setImportOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-card/50 transition-colors"
                   >
-                    <Globe className="h-4 w-4 text-blue-400" />
+                    <Globe className="h-4 w-4 text-info" />
                     Website
                   </Link>
                   <Link
                     href="/imports/github"
                     onClick={() => setImportOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-card/50 transition-colors"
                   >
-                    <GitBranch className="h-4 w-4 text-slate-400" />
+                    <GitBranch className="h-4 w-4 text-muted-foreground" />
                     GitHub Repo
                   </Link>
                   <Link
                     href="/imports/youtube"
                     onClick={() => setImportOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-card/50 transition-colors"
                   >
-                    <Video className="h-4 w-4 text-red-400" />
+                    <Video className="h-4 w-4 text-destructive-foreground" />
                     YouTube
                   </Link>
                 </div>
@@ -279,7 +276,7 @@ export default function DocumentsPage() {
           </div>
           <Link
             href="/upload"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all"
           >
             <span>Upload</span>
           </Link>
@@ -290,13 +287,14 @@ export default function DocumentsPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3 w-full max-w-md">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
+                suppressHydrationWarning
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search documents..."
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-purple-500/30 transition-colors"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-popover/50 border border-border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/30 transition-colors"
               />
             </div>
           </div>
@@ -305,7 +303,7 @@ export default function DocumentsPage() {
             <select
               value={collectionFilter}
               onChange={(e) => setCollectionFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-xs text-slate-300 focus:outline-none focus:border-purple-500/30 transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-popover/50 border border-border text-xs text-foreground focus:outline-none focus:border-primary/30 transition-colors"
             >
               <option value="">All Collections</option>
               {collections?.map((c) => (
@@ -318,7 +316,7 @@ export default function DocumentsPage() {
             <select
               value={folderFilter}
               onChange={(e) => setFolderFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-xs text-slate-300 focus:outline-none focus:border-purple-500/30 transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-popover/50 border border-border text-xs text-foreground focus:outline-none focus:border-primary/30 transition-colors"
             >
               <option value="">All Folders</option>
               {folders?.map((f) => (
@@ -331,7 +329,7 @@ export default function DocumentsPage() {
             <select
               value={fileTypeFilter}
               onChange={(e) => setFileTypeFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-xs text-slate-300 focus:outline-none focus:border-purple-500/30 transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-popover/50 border border-border text-xs text-foreground focus:outline-none focus:border-primary/30 transition-colors"
             >
               <option value="">All Types</option>
               {['pdf', 'docx', 'md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'csv'].map((t) => (
@@ -344,7 +342,7 @@ export default function DocumentsPage() {
             <select
               value={tagFilter}
               onChange={(e) => setTagFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-xs text-slate-300 focus:outline-none focus:border-purple-500/30 transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-popover/50 border border-border text-xs text-foreground focus:outline-none focus:border-primary/30 transition-colors"
             >
               <option value="">All Tags</option>
               {tags?.map((t) => (
@@ -357,7 +355,7 @@ export default function DocumentsPage() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-card/30 transition-all"
               >
                 <X className="h-3 w-3" />
                 Clear
@@ -369,21 +367,23 @@ export default function DocumentsPage() {
         {isLoading ? (
           <LoadingSkeleton />
         ) : error ? (
-          <div className="glass-panel rounded-xl border border-red-900/30 p-8 text-center">
-            <div className="p-3 rounded-xl bg-red-500/10 inline-flex mb-3">
-              <X className="h-6 w-6 text-red-400" />
+          <div className="glass-panel rounded-xl border border-destructive/30 p-8 text-center">
+            <div className="p-3 rounded-xl bg-destructive/10 inline-flex mb-3">
+              <X className="h-6 w-6 text-destructive-foreground" />
             </div>
-            <p className="text-sm text-slate-400">Failed to load documents. Please try again.</p>
+            <p className="text-sm text-muted-foreground">
+              Failed to load documents. Please try again.
+            </p>
           </div>
         ) : documents.length === 0 ? (
-          <div className="glass-panel rounded-xl border border-slate-800/60 p-12 text-center">
-            <div className="p-3 rounded-xl bg-slate-800/50 inline-flex mb-3">
-              <FileText className="h-6 w-6 text-slate-500" />
+          <div className="glass-panel rounded-xl border border-border p-12 text-center">
+            <div className="p-3 rounded-xl bg-card/50 inline-flex mb-3">
+              <FileText className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="text-sm font-semibold text-slate-300 mb-1">
+            <h3 className="text-sm font-semibold text-foreground mb-1">
               {hasActiveFilters ? 'No matching documents' : 'No documents yet'}
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-xs text-muted-foreground mb-4">
               {hasActiveFilters
                 ? 'Try adjusting your filters or search query.'
                 : 'Upload your first document to get started.'}
@@ -391,7 +391,7 @@ export default function DocumentsPage() {
             {!hasActiveFilters && (
               <Link
                 href="/upload"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-primary text-xs font-semibold text-foreground shadow-lg shadow-primary/10 transition-all"
               >
                 Upload Document
               </Link>

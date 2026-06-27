@@ -31,7 +31,7 @@ function highlightText(text: string, query: string): React.ReactNode {
   const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
   return parts.map((part, i) =>
     part.toLowerCase() === query.toLowerCase() ? (
-      <mark key={i} className="bg-purple-500/20 text-purple-300 rounded-sm px-0.5">
+      <mark key={i} className="bg-primary/20 text-primary rounded-sm px-0.5">
         {part}
       </mark>
     ) : (
@@ -127,23 +127,24 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen">
       {/* Search header */}
-      <div className="border-b border-slate-800/50 px-6 py-4">
+      <div className="border-b border-border px-6 py-4">
         <form onSubmit={handleSearch} className="max-w-2xl">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
+              suppressHydrationWarning
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search documents, tags, collections..."
               autoFocus
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-white placeholder-slate-500 outline-none focus:border-purple-500/50 transition-colors text-sm"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-popover/50 border border-border text-foreground placeholder-muted-foreground outline-none focus:border-primary/50 transition-colors text-sm"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -157,22 +158,22 @@ export default function SearchPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors ${
               showFilters
-                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                : 'bg-slate-800/50 text-slate-400 border border-slate-700/50 hover:text-slate-200'
+                ? 'bg-primary/10 text-primary border border-primary/20'
+                : 'bg-card/50 text-muted-foreground border border-border hover:text-foreground'
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             Filters
           </button>
           {results && (
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted-foreground">
               {results.total} result{results.total !== 1 ? 's' : ''} · {results.took}ms
             </span>
           )}
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-destructive-foreground hover:text-destructive-foreground hover:bg-destructive/10 transition-colors"
             >
               <X className="w-3 h-3" />
               Clear filters
@@ -182,15 +183,15 @@ export default function SearchPage() {
 
         {/* Filter panel */}
         {showFilters && (
-          <div className="mt-3 p-4 rounded-xl bg-slate-900/50 border border-slate-700/50 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="mt-3 p-4 rounded-xl bg-popover/50 border border-border grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <div>
-              <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
                 Mode
               </label>
               <select
                 value={mode}
                 onChange={(e) => setMode(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-purple-500/50"
+                className="w-full bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary/50"
               >
                 <option value="hybrid">Hybrid</option>
                 <option value="keyword">Keyword</option>
@@ -198,13 +199,13 @@ export default function SearchPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
                 Collection
               </label>
               <select
                 value={collectionId}
                 onChange={(e) => setCollectionId(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-purple-500/50"
+                className="w-full bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary/50"
               >
                 <option value="">All</option>
                 {collections?.map((c: any) => (
@@ -215,13 +216,13 @@ export default function SearchPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
                 Tag
               </label>
               <select
                 value={tagId}
                 onChange={(e) => setTagId(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-purple-500/50"
+                className="w-full bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary/50"
               >
                 <option value="">All</option>
                 {tags?.map((t: any) => (
@@ -232,13 +233,13 @@ export default function SearchPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
                 File Type
               </label>
               <select
                 value={fileType}
                 onChange={(e) => setFileType(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-purple-500/50"
+                className="w-full bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary/50"
               >
                 <option value="">All</option>
                 <option value="pdf">PDF</option>
@@ -248,25 +249,26 @@ export default function SearchPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
                 Author
               </label>
               <input
+                suppressHydrationWarning
                 type="text"
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Any"
-                className="w-full bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-300 placeholder-slate-600 outline-none focus:border-purple-500/50"
+                className="w-full bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-foreground placeholder-muted-foreground outline-none focus:border-primary/50"
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+              <label className="block text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
                 Language
               </label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-300 outline-none focus:border-purple-500/50"
+                className="w-full bg-card border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary/50"
               >
                 <option value="">All</option>
                 <option value="en">English</option>
@@ -286,20 +288,20 @@ export default function SearchPage() {
         <div className="flex-1 px-6 py-4 space-y-3">
           {isFetching && (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
             </div>
           )}
 
           {!isFetching && isError && (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-muted-foreground">
               <p>Search failed. Please try again.</p>
             </div>
           )}
 
           {!isFetching && !isError && results && results.data.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              <Search className="w-12 h-12 mx-auto mb-3 text-slate-700" />
-              <p className="text-lg font-medium text-slate-400 mb-1">No results found</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-lg font-medium text-muted-foreground mb-1">No results found</p>
               <p className="text-sm">Try a different search term or adjust your filters.</p>
             </div>
           )}
@@ -311,27 +313,27 @@ export default function SearchPage() {
               return (
                 <div
                   key={`${hit.documentId}-${hit.chunkIndex ?? 0}`}
-                  className="p-4 rounded-xl border border-slate-800/50 bg-slate-900/30 hover:bg-slate-900/50 hover:border-slate-700/50 transition-all cursor-pointer"
+                  className="p-4 rounded-xl border border-border bg-popover/30 hover:bg-popover/50 hover:border-border transition-all cursor-pointer"
                   onClick={() => router.push(`/documents/${hit.documentId}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-purple-500/10 shrink-0">
-                      <Icon className="w-4 h-4 text-purple-400" />
+                    <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                      <Icon className="w-4 h-4 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-white truncate">
+                      <h3 className="text-sm font-medium text-foreground truncate">
                         {highlightText(hit.title, debouncedQuery)}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {highlightText(hit.matchedContent, debouncedQuery)}
                       </p>
                       {hit.description && (
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-1">
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                           {hit.description}
                         </p>
                       )}
                       {/* Metadata */}
-                      <div className="flex items-center gap-3 mt-2 flex-wrap text-[10px] text-slate-600">
+                      <div className="flex items-center gap-3 mt-2 flex-wrap text-[10px] text-muted-foreground">
                         {hit.chunkIndex !== undefined && (
                           <span className="flex items-center gap-1">
                             <FileText className="w-3 h-3" />
@@ -358,7 +360,7 @@ export default function SearchPage() {
                           {hit.tags.map((t) => (
                             <span
                               key={t.id}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-400"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-card text-[10px] text-muted-foreground"
                             >
                               <Tag className="w-2.5 h-2.5" />
                               {t.name}
@@ -378,18 +380,18 @@ export default function SearchPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-slate-400 bg-slate-800/50 border border-slate-700/50 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-muted-foreground bg-card/50 border border-border hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Previous
               </button>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 Page {results.page} of {results.totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(results.totalPages, p + 1))}
                 disabled={page >= results.totalPages}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-slate-400 bg-slate-800/50 border border-slate-700/50 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-muted-foreground bg-card/50 border border-border hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 Next
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -398,8 +400,8 @@ export default function SearchPage() {
           )}
 
           {!isFetching && !isError && !results && !debouncedQuery && (
-            <div className="text-center py-12 text-slate-500">
-              <Search className="w-12 h-12 mx-auto mb-3 text-slate-700" />
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
               <p className="text-sm">
                 Enter a search query to find knowledge across your workspace.
               </p>
@@ -409,8 +411,8 @@ export default function SearchPage() {
 
         {/* Recent searches sidebar */}
         {historyEntries.length > 0 && (
-          <aside className="hidden lg:block w-64 border-l border-slate-800/50 px-4 py-4">
-            <h4 className="text-[10px] uppercase tracking-wider text-slate-500 mb-3 font-medium">
+          <aside className="hidden lg:block w-64 border-l border-border px-4 py-4">
+            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3 font-medium">
               Recent Searches
             </h4>
             <div className="space-y-1">
@@ -422,7 +424,7 @@ export default function SearchPage() {
                     setDebouncedQuery(entry.query);
                     setPage(1);
                   }}
-                  className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-colors truncate"
+                  className="w-full text-left px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-card/30 transition-colors truncate"
                 >
                   {entry.query}
                 </button>
