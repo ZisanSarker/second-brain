@@ -11,7 +11,7 @@ ENV UV_SYSTEM_PYTHON=1
 
 WORKDIR /app
 
-COPY pyproject.toml .
+COPY pyproject.toml uv.lock ./
 
 RUN uv sync --no-dev --frozen
 
