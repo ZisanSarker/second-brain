@@ -191,6 +191,13 @@ model Workspace {
   resourcePermissions ResourcePermission[]
   mentions      Mention[]
   generatedContent GeneratedContent[]
+  agents            Agent[]
+  agentExecutions   AgentExecution[]
+  workflows         Workflow[]
+  approvals         Approval[]
+  agentSchedules    AgentSchedule[]
+  agentMemories     AgentMemory[]
+  agentTools        AgentTool[]
 
   @@index([slug])
 }
@@ -846,4 +853,179 @@ model RefreshToken {
   @@index([userId])
   @@index([tokenHash])
   @@index([family])
+}
+
+enum AgentExecutionStatus {
+  QUEUED
+  PLANNING
+  RUNNING
+  WAITING_APPROVAL
+  COMPLETED
+  FAILED
+  CANCELLED
+  RETRYING
+}
+
+model Agent {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type          String   // KNOWLEDGE, RESEARCH, DOCUMENTATION, STUDY, WRITING, CODE, COMPARISON, TRANSLATION, TASK_PLANNER
+  name          String
+  description   String?
+  icon          String?  @default("Bot")
+  systemPrompt  String
+  config        Json     @default("{}")
+  isDefault     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([workspaceId, type])
+  @@index([workspaceId])
+}
+
+model AgentExecution {
+  id                 String              @id @default(uuid())
+  workspaceId        String
+  workspace          Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agentId            String?
+  userId             String?
+  type               String              // agent type or 'WORKFLOW'
+  status             AgentExecutionStatus @default(QUEUED)
+  input              Json                @default("{}")
+  output             Json?
+  plan               Json?
+  error              String?
+  tokenUsage         Json?               // { prompt, completion, total }
+  startedAt          DateTime?
+  completedAt        DateTime?
+  parentExecutionId  String?
+  metadata           Json?
+  steps              AgentExecutionStep[]
+  approvals          Approval[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([agentId])
+  @@index([userId])
+}
+
+model AgentExecutionStep {
+  id            String   @id @default(uuid())
+  executionId   String
+  execution     AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  stepIndex     Int
+  type          String   // TOOL_CALL, LLM_REASONING, WORKFLOW, APPROVAL
+  toolName      String?
+  toolInput     Json?
+  toolOutput    Json?
+  llmPrompt     String?
+  llmResponse   String?
+  status        String   @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED, SKIPPED
+  startedAt     DateTime?
+  completedAt   DateTime?
+  retryCount    Int      @default(0)
+  error         String?
+  createdAt     DateTime @default(now())
+
+  @@index([executionId, stepIndex])
+}
+
+model Workflow {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  trigger     Json     @default("{}")  // { type: 'MANUAL' | 'SCHEDULE' | 'EVENT', config: {...} }
+  steps       Json     @default("[]")  // Array of step definitions
+  isActive    Boolean  @default(true)
+  createdBy   String?
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+model Approval {
+  id           String   @id @default(uuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  executionId  String?
+  execution    AgentExecution? @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  stepId       String?
+  requestedBy  String?  // user who hit the approval gate
+  assignedTo   String?  // specific user; null = any admin
+  status       String   @default("PENDING") // PENDING, APPROVED, REJECTED, MODIFIED
+  action       String   // DELETE_DOCUMENT, SHARE_RESOURCE, EXPENSIVE_AI_TASK, EXTERNAL_INTEGRATION
+  context      Json     @default("{}")
+  modification Json?
+  decidedBy    String?
+  decidedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([workspaceId, status])
+  @@index([executionId])
+}
+
+model AgentSchedule {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agentId     String?
+  workflowId  String?
+  name        String
+  cron        String   // cron expression
+  input       Json     @default("{}")
+  isActive    Boolean  @default(true)
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+model AgentMemory {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  agentId     String?
+  type        String   // CONVERSATION, WORKSPACE, TASK, TOOL_RESULT
+  key         String
+  value       Json     @default("{}")
+  ttl         Int?     // auto-expiry in seconds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([workspaceId, userId, key])
+  @@index([workspaceId, userId])
+  @@index([workspaceId, userId, type])
+}
+
+model AgentTool {
+  id           String   @id @default(uuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name         String
+  description  String
+  inputSchema  Json     @default("{}")
+  outputSchema Json     @default("{}")
+  minRole      String   @default("MEMBER") // VIEWER, MEMBER, EDITOR, ADMIN
+  isBuiltin    Boolean  @default(false)
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
 }

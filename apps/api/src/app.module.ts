@@ -35,6 +35,7 @@ import { AutomationModule } from './automation/automation.module';
 import { SettingsModule } from './settings/settings.module';
 import { JobsModule } from './jobs/jobs.module';
 import { SharedModule } from './shared/shared.module';
+import { AgentModule } from './agent/agent.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { SharedModule } from './shared/shared.module';
     SettingsModule,
     JobsModule,
     SharedModule,
+    AgentModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],
