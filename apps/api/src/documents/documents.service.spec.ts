@@ -393,6 +393,31 @@ describe('DocumentsService', () => {
     });
   });
 
+  describe('getPresignedUploadUrl', () => {
+    it('should return presigned URL from storage service', async () => {
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberFixture);
+      mockStorage.getPresignedUploadUrl.mockResolvedValue({
+        url: 'https://minio.example.com/upload/test',
+        key: 'uploads/ws-1/user-1/test.pdf',
+      });
+
+      const result = await service.getPresignedUploadUrl('ws-1', 'user-1', 'test.pdf');
+
+      expect(mockStorage.getPresignedUploadUrl).toHaveBeenCalledWith('ws-1', 'user-1', 'test.pdf');
+      expect(result.url).toContain('minio');
+      expect(result.key).toContain('test.pdf');
+    });
+
+    it('should throw ForbiddenException for non-members', async () => {
+      mockPrisma.workspaceMember.findUnique.mockResolvedValue(null);
+
+      await expect(service.getPresignedUploadUrl('ws-1', 'user-1', 'test.pdf')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockStorage.getPresignedUploadUrl).not.toHaveBeenCalled();
+    });
+  });
+
   describe('assignTags', () => {
     it('should connect tags', async () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(editorFixture);

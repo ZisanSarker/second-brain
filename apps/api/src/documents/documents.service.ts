@@ -434,6 +434,7 @@ export class DocumentsService {
   }
 
   async getPresignedUploadUrl(workspaceId: string, userId: string, fileName: string) {
+    await this.requireWorkspaceAccess(workspaceId, userId);
     return this.storage.getPresignedUploadUrl(workspaceId, userId, fileName);
   }
 
