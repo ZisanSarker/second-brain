@@ -53,7 +53,7 @@ pnpm install
 
 # 2. Copy environment files
 cp .env.example .env
-# Edit .env and set OPENROUTER_API_KEY=your-key
+# Edit .env and set LLM_API_KEY=your-key
 
 # 3. Start infrastructure services
 docker compose up -d postgres redis qdrant minio
@@ -90,13 +90,13 @@ docker compose up --build -d
 
 All variables are documented in [`.env.example`](.env.example). Key variables:
 
-| Variable             | Required   | Description                                                |
-| -------------------- | ---------- | ---------------------------------------------------------- |
-| `DATABASE_URL`       | Yes        | PostgreSQL connection string                               |
-| `JWT_SECRET`         | Yes        | **Change this in production** — use `openssl rand -hex 64` |
-| `REDIS_HOST`         | Yes        | Redis host for BullMQ queues                               |
-| `MINIO_ENDPOINT`     | Yes        | MinIO S3 endpoint                                          |
-| `OPENROUTER_API_KEY` | Production | API key for LLM access                                     |
+| Variable         | Required   | Description                                                |
+| ---------------- | ---------- | ---------------------------------------------------------- |
+| `DATABASE_URL`   | Yes        | PostgreSQL connection string                               |
+| `JWT_SECRET`     | Yes        | **Change this in production** — use `openssl rand -hex 64` |
+| `REDIS_HOST`     | Yes        | Redis host for BullMQ queues                               |
+| `MINIO_ENDPOINT` | Yes        | MinIO S3 endpoint                                          |
+| `LLM_API_KEY`    | Production | API key for LLM access                                     |
 
 ## Deployment (VPS)
 
@@ -117,7 +117,7 @@ cd /opt/second-brain
 cp .env.example .env
 # Edit .env:
 #   - Set strong JWT_SECRET (openssl rand -hex 64)
-#   - Set OPENROUTER_API_KEY
+#   - Set LLM_API_KEY
 #   - Set CORS_ORIGINS to your domain
 #   - Change POSTGRES_PASSWORD and MINIO_ROOT_PASSWORD
 
@@ -157,7 +157,7 @@ Before going live:
 
 - [ ] `JWT_SECRET` changed from default (use `openssl rand -hex 64`)
 - [ ] `POSTGRES_PASSWORD` and `MINIO_ROOT_PASSWORD` changed from defaults
-- [ ] `OPENROUTER_API_KEY` is set
+- [ ] `LLM_API_KEY` is set
 - [ ] SSL certificates mounted in `docker/ssl/`
 - [ ] `CORS_ORIGINS` set to your domain
 - [ ] Docker containers restart automatically (`restart: always`)
@@ -283,7 +283,7 @@ GraphQL endpoint: `http://localhost:3001/graphql` (playground in dev only)
 | Docker permission denied | Add user to docker group: `sudo usermod -aG docker $USER`           |
 | Port already in use      | Check `lsof -i :3001` / `lsof -i :5432` and kill the process        |
 | Prisma migration fails   | Ensure postgres is running: `docker compose up -d postgres`         |
-| OpenRouter returns 401   | Set `OPENROUTER_API_KEY` in `.env`                                  |
+| OpenRouter returns 401   | Set `LLM_API_KEY` in `.env`                                         |
 | AI service won't start   | Check `docker compose logs ai-service` for Python dependency errors |
 | Upload fails with 413    | Increase `client_max_body_size` in `docker/nginx.conf`              |
 | Redis connection refused | Ensure redis is healthy: `docker compose ps redis`                  |
