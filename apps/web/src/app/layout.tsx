@@ -9,6 +9,10 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'AI Second Brain - Intelligent Workspace',
   description: 'Organize your knowledge base, chat with documents, and automate workflows with AI.',
+  icons: {
+    icon: '/secondbrain_logo.png',
+    apple: '/secondbrain_logo.png',
+  },
 };
 
 export default function RootLayout({
@@ -18,7 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} min-h-screen text-slate-100`}>
+      <head>
+        <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
+        <link rel="apple-touch-icon" href="/secondbrain_logo.png?v=2" />
+      </head>
+      <body className={`${inter.className} min-h-screen text-foreground`} suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>{children}</AuthProvider>
         </QueryProvider>

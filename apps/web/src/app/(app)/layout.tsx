@@ -4,7 +4,6 @@ import { AuthGuard } from '@/lib/guards/AuthGuard';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  Brain,
   LayoutDashboard,
   Library,
   MessageSquare,
@@ -22,6 +21,7 @@ import {
   Sparkles,
   Bot,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { GlobalSearchBar } from '@/components/search/GlobalSearchBar';
@@ -69,33 +69,37 @@ function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#030303] flex">
+    <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-slate-800/50 flex flex-col">
-        <div className="p-4 border-b border-slate-800/50">
-          <Link href="/dashboard" className="flex items-center gap-2 text-white font-semibold">
-            <div className="p-1.5 rounded-lg bg-purple-500/10">
-              <Brain className="w-5 h-5 text-purple-400" />
-            </div>
+      <aside className="w-64 border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border">
+          <Link href="/dashboard" className="flex items-center gap-2 text-foreground font-semibold">
+            <Image
+              src="/secondbrain_logo.png"
+              alt="Second Brain"
+              width={36}
+              height={36}
+              className="rounded-lg"
+            />
             Second Brain
           </Link>
         </div>
 
         {/* Workspace selector */}
-        <div className="px-3 py-3 border-b border-slate-800/50">
+        <div className="px-3 py-3 border-b border-border">
           <div className="relative">
             <button
               onClick={() => setWsOpen(!wsOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-700/50 text-sm text-slate-300 hover:border-purple-500/30 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-popover border border-border text-sm text-foreground hover:border-primary/30 transition-colors"
             >
               <span className="truncate">{currentWorkspace?.name || 'Select workspace'}</span>
-              <ChevronDown className="w-4 h-4 text-slate-500" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </button>
 
             {wsOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setWsOpen(false)} />
-                <div className="absolute top-full left-0 right-0 mt-1 z-20 glass-panel rounded-xl py-1 border border-slate-700/50 max-h-48 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 z-20 glass-panel rounded-xl py-1 border border-border max-h-48 overflow-y-auto">
                   {workspaces.map((ws) => (
                     <button
                       key={ws.id}
@@ -105,18 +109,18 @@ function AppShell({ children }: { children: React.ReactNode }) {
                       }}
                       className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                         currentWorkspace?.id === ws.id
-                          ? 'text-purple-400 bg-purple-500/10'
-                          : 'text-slate-300 hover:bg-slate-800/50'
+                          ? 'text-primary bg-primary/10'
+                          : 'text-foreground hover:bg-muted/50'
                       }`}
                     >
                       {ws.name}
                     </button>
                   ))}
-                  <div className="border-t border-slate-700/50 mt-1 pt-1">
+                  <div className="border-t border-border mt-1 pt-1">
                     <Link
                       href="/workspaces/new"
                       onClick={() => setWsOpen(false)}
-                      className="block px-3 py-2 text-sm text-purple-400 hover:bg-slate-800/50 transition-colors"
+                      className="block px-3 py-2 text-sm text-primary hover:bg-muted/50 transition-colors"
                     >
                       + New workspace
                     </Link>
@@ -137,8 +141,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 href={link.href}
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all ${
                   isActive
-                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
                 }`}
               >
                 <link.icon className="w-4 h-4" />
@@ -149,24 +153,24 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User / Logout */}
-        <div className="p-3 border-t border-slate-800/50 space-y-1">
+        <div className="p-3 border-t border-border space-y-1">
           <Link
             href="/profile"
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
           >
             <Users className="w-4 h-4" />
             Profile
           </Link>
           <Link
             href="/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
           >
             <Settings className="w-4 h-4" />
             Settings
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-destructive-foreground hover:text-destructive-foreground hover:bg-destructive/10 transition-all"
           >
             <LogOut className="w-4 h-4" />
             Sign out
@@ -174,7 +178,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
           {user && (
             <div className="px-3 py-2 mt-1">
-              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             </div>
           )}
         </div>
@@ -183,7 +187,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <main className="flex-1 overflow-auto">
         {/* Top header with global search */}
-        <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 border-b border-slate-800/50 bg-[#030303]/80 backdrop-blur-sm">
+        <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 border-b border-border bg-background/80 backdrop-blur-sm">
           <div className="flex-1" />
           <div className="flex-1 flex justify-center">
             <GlobalSearchBar />
