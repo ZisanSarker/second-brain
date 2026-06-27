@@ -19,6 +19,7 @@ import {
   Heart,
   Trash2,
   Search,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -28,6 +29,7 @@ const sidebarLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/search', label: 'Search', icon: Search },
+  { href: '/ai', label: 'AI Tools', icon: Sparkles },
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/collections', label: 'Collections', icon: Library },
   { href: '/tags', label: 'Tags', icon: Tags },
