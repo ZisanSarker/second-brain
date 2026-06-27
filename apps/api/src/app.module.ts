@@ -16,7 +16,11 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
 import { TeamsModule } from './teams/teams.module';
 import { DocumentsModule } from './documents/documents.module';
 import { CollectionsModule } from './collections/collections.module';
+import { FoldersModule } from './folders/folders.module';
 import { TagsModule } from './tags/tags.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { TrashModule } from './trash/trash.module';
+import { RecentModule } from './recent/recent.module';
 import { SearchModule } from './search/search.module';
 import { ChatModule } from './chat/chat.module';
 import { AiModule } from './ai/ai.module';
@@ -57,7 +61,11 @@ import { SharedModule } from './shared/shared.module';
     TeamsModule,
     DocumentsModule,
     CollectionsModule,
+    FoldersModule,
     TagsModule,
+    FavoritesModule,
+    TrashModule,
+    RecentModule,
     SearchModule,
     ChatModule,
     AiModule,
