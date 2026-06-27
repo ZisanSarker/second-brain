@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY pyproject.toml .
 
-RUN uv pip install --no-cache --system pyproject.toml
+RUN uv sync --no-dev --frozen
 
 COPY config.py schemas.py extractors.py service.py main.py ./
 
