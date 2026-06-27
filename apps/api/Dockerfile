@@ -1,5 +1,5 @@
 FROM node:24-alpine AS base
-RUN npm install -g pnpm@9.15.4
+RUN apk add --no-cache wget && npm install -g pnpm@9.15.4
 
 FROM base AS builder
 WORKDIR /app

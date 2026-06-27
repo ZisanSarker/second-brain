@@ -1,0 +1,201 @@
+'use client';
+
+import { AuthGuard } from '@/lib/guards/AuthGuard';
+import { useAuthStore } from '@/lib/store/auth-store';
+import { useRouter, usePathname } from 'next/navigation';
+import {
+  LayoutDashboard,
+  Library,
+  MessageSquare,
+  Settings,
+  Users,
+  LogOut,
+  ChevronDown,
+  FileText,
+  Tags,
+  Upload,
+  Clock,
+  Heart,
+  Trash2,
+  Search,
+  Sparkles,
+  Bot,
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { GlobalSearchBar } from '@/components/search/GlobalSearchBar';
+
+const sidebarLinks = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/chat', label: 'Chat', icon: MessageSquare },
+  { href: '/search', label: 'Search', icon: Search },
+  { href: '/ai', label: 'AI Tools', icon: Sparkles },
+  { href: '/agents', label: 'AI Agents', icon: Bot },
+  { href: '/documents', label: 'Documents', icon: FileText },
+  { href: '/collections', label: 'Collections', icon: Library },
+  { href: '/tags', label: 'Tags', icon: Tags },
+  { href: '/upload', label: 'Upload', icon: Upload },
+  { href: '/recent', label: 'Recent', icon: Clock },
+  { href: '/favorites', label: 'Favorites', icon: Heart },
+  { href: '/trash', label: 'Trash', icon: Trash2 },
+  { href: '/workspaces', label: 'Workspaces', icon: Users },
+];
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthGuard>
+      <AppShell>{children}</AppShell>
+    </AuthGuard>
+  );
+}
+
+function AppShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, currentWorkspace, workspaces, logout, setCurrentWorkspace } = useAuthStore();
+  const [wsOpen, setWsOpen] = useState(false);
+
+  useEffect(() => {
+    // Fetch workspaces if not loaded
+    if (workspaces.length === 0) {
+      useAuthStore.getState().fetchWorkspaces();
+    }
+  }, [workspaces.length]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <aside className="w-64 border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border">
+          <Link href="/dashboard" className="flex items-center gap-2 text-foreground font-semibold">
+            <Image
+              src="/secondbrain_logo.png"
+              alt="Second Brain"
+              width={36}
+              height={36}
+              className="rounded-lg"
+            />
+            Second Brain
+          </Link>
+        </div>
+
+        {/* Workspace selector */}
+        <div className="px-3 py-3 border-b border-border">
+          <div className="relative">
+            <button
+              onClick={() => setWsOpen(!wsOpen)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-popover border border-border text-sm text-foreground hover:border-primary/30 transition-colors"
+            >
+              <span className="truncate">{currentWorkspace?.name || 'Select workspace'}</span>
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            </button>
+
+            {wsOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setWsOpen(false)} />
+                <div className="absolute top-full left-0 right-0 mt-1 z-20 glass-panel rounded-xl py-1 border border-border max-h-48 overflow-y-auto">
+                  {workspaces.map((ws) => (
+                    <button
+                      key={ws.id}
+                      onClick={() => {
+                        setCurrentWorkspace(ws);
+                        setWsOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                        currentWorkspace?.id === ws.id
+                          ? 'text-primary bg-primary/10'
+                          : 'text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      {ws.name}
+                    </button>
+                  ))}
+                  <div className="border-t border-border mt-1 pt-1">
+                    <Link
+                      href="/workspaces/new"
+                      onClick={() => setWsOpen(false)}
+                      className="block px-3 py-2 text-sm text-primary hover:bg-muted/50 transition-colors"
+                    >
+                      + New workspace
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-3 space-y-1">
+          {sidebarLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all ${
+                  isActive
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                }`}
+              >
+                <link.icon className="w-4 h-4" />
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User / Logout */}
+        <div className="p-3 border-t border-border space-y-1">
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
+          >
+            <Users className="w-4 h-4" />
+            Profile
+          </Link>
+          <Link
+            href="/settings"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
+          >
+            <Settings className="w-4 h-4" />
+            Settings
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-destructive-foreground hover:text-destructive-foreground hover:bg-destructive/10 transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+
+          {user && (
+            <div className="px-3 py-2 mt-1">
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-auto">
+        {/* Top header with global search */}
+        <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="flex-1" />
+          <div className="flex-1 flex justify-center">
+            <GlobalSearchBar />
+          </div>
+          <div className="flex-1" />
+        </div>
+        {children}
+      </main>
+    </div>
+  );
+}

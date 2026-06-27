@@ -16,3 +16,8 @@ out/
 # Python virtual environments
 .venv/
 apps/ai/.venv/
+
+# Python bytecode
+__pycache__/
+.pytest_cache/
+.ruff_cache/
