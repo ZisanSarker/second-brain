@@ -57,6 +57,24 @@ enum GeneratedContentType {
   QUIZ
   NOTES
   MINDMAP
+  COMPARISON
+  TRANSLATION
+  ELI5
+  TAKEAWAYS
+  ACTION_ITEMS
+  TIMELINE
+  GLOSSARY
+  FAQ
+  STUDY_PLAN
+  INTERVIEW_QUESTIONS
+}
+
+enum AiTaskStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
 
 enum NotificationType {
@@ -121,6 +139,9 @@ model Workspace {
   notifications Notification[]
   files       File[]
   searchHistory SearchHistory[]
+  aiTemplates   AiTemplate[]
+  aiTasks       AiTask[]
+  generatedContent GeneratedContent[]
 
   @@index([slug])
 }
@@ -173,16 +194,17 @@ model APIKey {
 }
 
 model Collection {
-  id          String     @id @default(uuid())
-  workspaceId String
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  deletedAt   DateTime?
-  archivedAt  DateTime?
-  documents   Document[]
+  id               String             @id @default(uuid())
+  workspaceId      String
+  workspace        Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name             String
+  description      String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime?
+  archivedAt       DateTime?
+  documents        Document[]
+  generatedContent GeneratedContent[]
 
   @@index([workspaceId])
 }
@@ -445,16 +467,67 @@ model DocumentImport {
 }
 
 model GeneratedContent {
-  id          String               @id @default(uuid())
-  documentId  String
-  document    Document             @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  type        GeneratedContentType
-  content     Json
-  model       String               @default("openai/gpt-4o")
-  createdBy   String?
-  createdAt   DateTime             @default(now())
+  id           String               @id @default(uuid())
+  workspaceId  String?
+  workspace    Workspace?           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  collectionId String?
+  collection   Collection?          @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  documentId   String?
+  document     Document?            @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  type         GeneratedContentType
+  title        String?
+  content      Json
+  model        String               @default("openai/gpt-4o")
+  tags         String[]             @default([])
+  createdBy    String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
+  @@index([workspaceId, type])
   @@index([documentId, type])
+  @@index([collectionId, type])
+}
+
+model AiTemplate {
+  id           String   @id @default(uuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  type         String
+  systemPrompt String
+  userPrompt   String?
+  outputSchema Json?
+  isDefault    Boolean  @default(false)
+  version      Int      @default(1)
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, type])
+}
+
+model AiTask {
+  id            String        @id @default(uuid())
+  workspaceId   String
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parentTaskId  String?
+  parentTask    AiTask?       @relation("AiTaskChildren", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  children      AiTask[]      @relation("AiTaskChildren")
+  documentId    String?
+  collectionId  String?
+  type          String
+  status        AiTaskStatus  @default(QUEUED)
+  progress      Int           @default(0)
+  resultId      String?
+  errorMessage  String?
+  metadata      Json          @default("{}")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, createdAt])
 }
 
 model Notification {
