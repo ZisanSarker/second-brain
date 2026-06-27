@@ -1,11 +1,11 @@
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from './roles.guard';
-import { PrismaService } from '../../shared/services/prisma.service';
 
 describe('RolesGuard', () => {
   let guard: RolesGuard;
   let reflector: any;
   let prisma: any;
+  let cache: any;
 
   const mockReflector = {
     getAllAndOverride: jest.fn(),
@@ -17,10 +17,16 @@ describe('RolesGuard', () => {
     },
   };
 
+  const mockCache = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
+
   beforeEach(() => {
     reflector = mockReflector;
     prisma = mockPrisma;
-    guard = new RolesGuard(reflector, prisma);
+    cache = mockCache;
+    guard = new RolesGuard(reflector, prisma, cache);
     jest.clearAllMocks();
   });
 

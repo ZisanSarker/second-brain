@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../shared/services/prisma.service';
+import { CacheService } from '../../shared/services/cache.service';
 import { ROLE_HIERARCHY } from '../../shared/constants/role-hierarchy';
 
 export const ROLES_KEY = 'roles';
@@ -11,6 +12,7 @@ export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
+    private cache: CacheService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -31,17 +33,25 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    const member = await this.prisma.workspaceMember.findUnique({
-      where: {
-        workspaceId_userId: { workspaceId, userId },
-      },
-    });
+    const cacheKey = `role:${workspaceId}:${userId}`;
+    let memberRole = await this.cache.get<string>(cacheKey);
 
-    if (!member) {
-      return false;
+    if (!memberRole) {
+      const member = await this.prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: { workspaceId, userId },
+        },
+      });
+
+      if (!member) {
+        return false;
+      }
+
+      memberRole = member.role;
+      await this.cache.set(cacheKey, memberRole, 30);
     }
 
-    const userLevel = ROLE_HIERARCHY[member.role] ?? 0;
+    const userLevel = ROLE_HIERARCHY[memberRole] ?? 0;
     const requiredLevel = Math.min(...requiredRoles.map((r) => ROLE_HIERARCHY[r] ?? 0));
 
     return userLevel >= requiredLevel;
