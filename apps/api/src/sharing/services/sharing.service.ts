@@ -53,21 +53,21 @@ export class SharingService {
     return perm;
   }
 
-  async listPermissions(entityType: string, entityId: string, requestingUserId: string) {
+  async listPermissions(entityType: string, entityId: string, _requestingUserId: string) {
     return this.prisma.resourcePermission.findMany({
       where: { entityType, entityId },
       include: { user: { select: { id: true, name: true, avatarUrl: true, email: true } } },
     });
   }
 
-  async updatePermission(id: string, role: string, userId: string) {
+  async updatePermission(id: string, role: string, _userId: string) {
     const perm = await this.prisma.resourcePermission.findUnique({ where: { id } });
     if (!perm) throw new Error('Permission not found');
 
     return this.prisma.resourcePermission.update({ where: { id }, data: { role } });
   }
 
-  async deletePermission(id: string, userId: string) {
+  async deletePermission(id: string, _userId: string) {
     const perm = await this.prisma.resourcePermission.findUnique({ where: { id } });
     if (!perm) throw new Error('Permission not found');
 

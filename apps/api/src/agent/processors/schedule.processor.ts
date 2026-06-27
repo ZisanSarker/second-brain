@@ -19,7 +19,7 @@ export class ScheduleProcessor extends WorkerHost {
     this.logger.log(`Processing schedule job ${job.id}`);
 
     try {
-      const { scheduleId, workspaceId, agentType, input } = job.data;
+      const { scheduleId } = job.data;
       await this.schedulerService.updateLastRun(scheduleId);
       return { processed: true };
     } catch (e: any) {

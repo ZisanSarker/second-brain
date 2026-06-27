@@ -58,6 +58,14 @@ describe('AuthService', () => {
       };
       return config[key] ?? defaultValue;
     }),
+    getOrThrow: jest.fn((key: string) => {
+      const config: Record<string, string> = {
+        JWT_SECRET: 'test-secret',
+        JWT_REFRESH_SECRET: 'test-refresh-secret',
+        JWT_EXPIRES_IN: '15m',
+      };
+      return config[key];
+    }),
   };
 
   beforeEach(async () => {

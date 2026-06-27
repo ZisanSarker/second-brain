@@ -78,7 +78,7 @@ export class PromptBuilderService {
     return DEFAULT_SYSTEM_PROMPT;
   }
 
-  private async getHistory(conversationId: string, contextTokens: number): Promise<ChatMessage[]> {
+  private async getHistory(conversationId: string, _contextTokens: number): Promise<ChatMessage[]> {
     const messages = await this.prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'desc' },

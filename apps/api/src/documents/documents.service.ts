@@ -91,7 +91,7 @@ export class DocumentsService {
     if (dto.fileType && dto.fileType !== 'link') {
       this.queue
         .enqueueProcessDocument(document.id, workspaceId, document.versions[0].id)
-        .catch((err) => {
+        .catch(() => {
           // Don't fail the create if enqueue fails
         });
     }
@@ -218,7 +218,7 @@ export class DocumentsService {
   async permanentDelete(workspaceId: string, documentId: string, userId: string) {
     await this.requireWorkspaceAccess(workspaceId, userId);
 
-    const doc = await this.prisma.document.findUniqueOrThrow({
+    await this.prisma.document.findUniqueOrThrow({
       where: { id: documentId },
     });
 

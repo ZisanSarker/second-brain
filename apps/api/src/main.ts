@@ -62,7 +62,6 @@ async function bootstrap() {
   logger.log(`NestJS Server running on http://localhost:${port}`);
   if (process.env.NODE_ENV !== 'production') {
     logger.log(`OpenAPI Docs available at http://localhost:${port}/api/docs`);
-    logger.log(`GraphQL Playground available at http://localhost:${port}/graphql`);
   }
 }
 bootstrap();

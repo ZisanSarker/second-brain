@@ -88,7 +88,7 @@ export class AuthService {
 
     try {
       payload = this.jwt.verify(refreshToken, {
-        secret: this.config.get('JWT_REFRESH_SECRET', 'refresh-secret-key'),
+        secret: this.config.getOrThrow('JWT_REFRESH_SECRET'),
       });
     } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -263,7 +263,7 @@ export class AuthService {
     const accessToken = await this.jwt.signAsync(
       { sub: userId, email },
       {
-        secret: this.config.get('JWT_SECRET', 'super-secret-jwt-key'),
+        secret: this.config.getOrThrow('JWT_SECRET'),
         expiresIn: this.config.get('JWT_EXPIRES_IN', '15m'),
       },
     );
@@ -271,7 +271,7 @@ export class AuthService {
     const refreshToken = await this.jwt.signAsync(
       { sub: userId, email, jti, family: tokenFamily },
       {
-        secret: this.config.get('JWT_REFRESH_SECRET', 'refresh-secret-key'),
+        secret: this.config.getOrThrow('JWT_REFRESH_SECRET'),
         expiresIn: '7d',
       },
     );

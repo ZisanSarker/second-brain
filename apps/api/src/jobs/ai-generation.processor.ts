@@ -134,7 +134,7 @@ export class AiGenerationProcessor extends WorkerHost {
   }
 
   private async generateContentFromData(data: GenerateContentJob) {
-    const { documentId, collectionId, type, workspaceId, taskId, language } = data;
+    const { documentId, collectionId, type, taskId, language } = data;
     this.logger.log(`Generating ${type} for document ${documentId || collectionId}`);
 
     await this.taskService.updateStatus(taskId, 'RUNNING');

@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard, Roles } from '../auth/guards/roles.guard';
 import { CurrentUser, WorkspaceId } from '../auth/decorators/current-user.decorator';
 import { DocumentsService } from './documents.service';
 import { ALLOWED_EXTENSIONS, AllowedExtension } from './constants/upload.constants';

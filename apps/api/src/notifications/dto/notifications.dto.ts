@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsOptional, IsBoolean } from 'class-validator';
 
 export class UpdateNotificationSettingDto {
   @IsOptional()

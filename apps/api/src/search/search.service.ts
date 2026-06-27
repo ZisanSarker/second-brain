@@ -1,5 +1,5 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../shared/services/prisma.service';
 import { AiService } from '../ai/ai.service';
 import { SearchHitDto, SearchResultsDto } from './dto/search-result.dto';
@@ -124,62 +124,68 @@ export class SearchService {
     const terms = query.trim().split(/\s+/).filter(Boolean);
     const shortQuery = query.length < 3;
 
-    // Build base document filter
-    const docFilter: string[] = [
-      `d."workspaceId" = ${this.escape(workspaceId)}`,
-      `d."deletedAt" IS NULL`,
-    ];
+    let pi = 0;
+    const values: unknown[] = [];
+    const docFilter: string[] = [`d."workspaceId" = $${++pi}`, `d."deletedAt" IS NULL`];
+    values.push(workspaceId);
+
     const joins: string[] = [];
-    const having: string[] = [];
 
     if (tagIds.length > 0) {
       joins.push(`JOIN "_DocumentTags" dt ON dt."A" = d.id`);
-      const escaped = tagIds.map((t) => `'${t.replace(/'/g, "''")}'`);
-      docFilter.push(`dt."B" IN (${escaped.join(',')})`);
+      const placeholders = tagIds.map(() => `$${++pi}`);
+      docFilter.push(`dt."B" IN (${placeholders.join(',')})`);
+      values.push(...tagIds);
     }
     if (params.collectionId) {
-      docFilter.push(`d."collectionId" = ${this.escape(params.collectionId)}`);
+      docFilter.push(`d."collectionId" = $${++pi}`);
+      values.push(params.collectionId);
     }
     if (params.folderId) {
-      docFilter.push(`d."folderId" = ${this.escape(params.folderId)}`);
+      docFilter.push(`d."folderId" = $${++pi}`);
+      values.push(params.folderId);
     }
     if (params.fileType) {
-      docFilter.push(`d."fileType" = ${this.escape(params.fileType)}`);
+      docFilter.push(`d."fileType" = $${++pi}`);
+      values.push(params.fileType);
     }
     if (params.author) {
-      docFilter.push(`d."author" ILIKE ${this.escape(`%${params.author}%`)}`);
+      docFilter.push(`d."author" ILIKE $${++pi}`);
+      values.push(`%${params.author}%`);
     }
     if (params.dateFrom) {
-      docFilter.push(`d."createdAt" >= ${this.escape(params.dateFrom)}::timestamp`);
+      docFilter.push(`d."createdAt" >= $${++pi}::timestamp`);
+      values.push(params.dateFrom);
     }
     if (params.dateTo) {
-      docFilter.push(`d."createdAt" <= ${this.escape(params.dateTo)}::timestamp`);
+      docFilter.push(`d."createdAt" <= $${++pi}::timestamp`);
+      values.push(params.dateTo);
     }
 
     const docWhere = docFilter.join(' AND ');
 
     let sql: string;
-    let hits: SearchHitDto[];
 
     if (shortQuery) {
-      // pg_trgm ILIKE prefix matching for short queries
+      const qIdx = ++pi;
+      const likeIdx = ++pi;
       sql = `
         SELECT d.id, d.title, d.description, d."fileType", d.author, d.language,
                d."updatedAt", d."collectionId", d."sourceType",
                c.id as "chunkId", c."chunkIndex", c."pageNumber", c.section, c.content,
                c."charStart",
-               similarity(c.content, ${this.escape(query)}) as score
+               similarity(c.content, $${qIdx}) as score
         FROM "DocumentChunk" c
         JOIN "DocumentVersion" dv ON dv.id = c."versionId"
         JOIN "Document" d ON d.id = dv."documentId"
         ${joins.join(' ')}
         WHERE ${docWhere}
-          AND c.content ILIKE ${this.escape(`%${query}%`)}
+          AND c.content ILIKE $${likeIdx}
         ORDER BY score DESC
         LIMIT 100
       `;
+      values.push(query, `%${query}%`);
     } else {
-      // PostgreSQL full-text search
       const tsquery = terms
         .map((t) => t.replace(/[^\w\s]/g, ''))
         .filter(Boolean)
@@ -190,6 +196,7 @@ export class SearchService {
         return this.metadataSearch(workspaceId, query, params);
       }
 
+      const tqIdx = ++pi;
       sql = `
         SELECT d.id, d.title, d.description, d."fileType", d.author, d.language,
                d."updatedAt", d."collectionId", d."sourceType",
@@ -197,20 +204,21 @@ export class SearchService {
                c."charStart",
                ts_rank_cd(
                  to_tsvector('english', coalesce(c.content, '')),
-                 to_tsquery('english', ${this.escape(tsquery)})
+                 to_tsquery('english', $${tqIdx})
                ) as score
         FROM "DocumentChunk" c
         JOIN "DocumentVersion" dv ON dv.id = c."versionId"
         JOIN "Document" d ON d.id = dv."documentId"
         ${joins.join(' ')}
         WHERE ${docWhere}
-          AND to_tsvector('english', coalesce(c.content, '')) @@ to_tsquery('english', ${this.escape(tsquery)})
+          AND to_tsvector('english', coalesce(c.content, '')) @@ to_tsquery('english', $${tqIdx})
         ORDER BY score DESC
         LIMIT 100
       `;
+      values.push(tsquery);
     }
 
-    const rows = await this.prisma.$queryRawUnsafe<any[]>(sql);
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(sql, ...values);
     const docMap = new Map<string, SearchHitDto>();
 
     for (const row of rows) {
@@ -245,7 +253,7 @@ export class SearchService {
       }
     }
 
-    hits = Array.from(docMap.values());
+    const hits = Array.from(docMap.values());
     // Normalize keyword scores
     const maxKw = Math.max(...hits.map((h) => h.keywordScore!), 1);
     hits.forEach((h) => (h.keywordScore = maxKw > 0 ? h.keywordScore! / maxKw : 0));
@@ -412,7 +420,7 @@ export class SearchService {
   private async applyFiltersAndPermissions(
     hits: SearchHitDto[],
     workspaceId: string,
-    params: SearchParams,
+    _params: SearchParams,
   ): Promise<SearchHitDto[]> {
     if (hits.length === 0) return [];
 
@@ -459,8 +467,6 @@ export class SearchService {
   private rerank(hits: SearchHitDto[]): SearchHitDto[] {
     // Freshness boost: documents updated within last 90 days get a boost
     const now = Date.now();
-    const ninetyDays = 90 * 24 * 60 * 60 * 1000;
-
     for (const hit of hits) {
       const updated = new Date(hit.updatedAt).getTime();
       const daysSinceUpdate = (now - updated) / (24 * 60 * 60 * 1000);
@@ -483,15 +489,16 @@ export class SearchService {
     if (!prefix || prefix.length < 1) return [];
 
     const results: SearchSuggestionDto[] = [];
-    const escaped = `'${prefix.replace(/'/g, "''")}%'`;
+    const pattern = `${prefix}%`;
 
     // Recent queries (from search history)
     const recentQueries = await this.prisma.$queryRawUnsafe<{ query: string }[]>(
       `SELECT DISTINCT query FROM "SearchHistory"
-       WHERE "workspaceId" = $1 AND "userId" = $2 AND query ILIKE ${escaped}
+       WHERE "workspaceId" = $1 AND "userId" = $2 AND query ILIKE $3
        ORDER BY "createdAt" DESC LIMIT 5`,
       workspaceId,
       userId,
+      pattern,
     );
     for (const r of recentQueries) {
       results.push({ text: r.query, type: 'query' });
@@ -500,9 +507,10 @@ export class SearchService {
     // Document titles (prefix)
     const docs = await this.prisma.$queryRawUnsafe<{ id: string; title: string }[]>(
       `SELECT id, title FROM "Document"
-       WHERE "workspaceId" = $1 AND "deletedAt" IS NULL AND title ILIKE ${escaped}
+       WHERE "workspaceId" = $1 AND "deletedAt" IS NULL AND title ILIKE $2
        LIMIT 5`,
       workspaceId,
+      pattern,
     );
     for (const d of docs) {
       results.push({ text: d.title, type: 'document', id: d.id });
@@ -511,9 +519,10 @@ export class SearchService {
     // Tags
     const tags = await this.prisma.$queryRawUnsafe<{ id: string; name: string }[]>(
       `SELECT id, name FROM "Tag"
-       WHERE "workspaceId" = $1 AND name ILIKE ${escaped}
+       WHERE "workspaceId" = $1 AND name ILIKE $2
        LIMIT 3`,
       workspaceId,
+      pattern,
     );
     for (const t of tags) {
       results.push({ text: t.name, type: 'tag', id: t.id, subtitle: 'Tag' });
@@ -522,9 +531,10 @@ export class SearchService {
     // Collections
     const collections = await this.prisma.$queryRawUnsafe<{ id: string; name: string }[]>(
       `SELECT id, name FROM "Collection"
-       WHERE "workspaceId" = $1 AND name ILIKE ${escaped}
+       WHERE "workspaceId" = $1 AND name ILIKE $2
        LIMIT 3`,
       workspaceId,
+      pattern,
     );
     for (const c of collections) {
       results.push({ text: c.name, type: 'collection', id: c.id, subtitle: 'Collection' });
@@ -607,10 +617,6 @@ export class SearchService {
   }
 
   // --- Helpers ---
-
-  private escape(val: string): string {
-    return `'${val.replace(/'/g, "''")}'`;
-  }
 
   private async requireMember(workspaceId: string, userId: string) {
     const member = await this.prisma.workspaceMember.findUnique({

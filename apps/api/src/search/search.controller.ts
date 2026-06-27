@@ -16,7 +16,7 @@ import { CurrentUser, WorkspaceId } from '../auth/decorators/current-user.decora
 import { SearchService } from './search.service';
 import { SearchQueryDto } from './dto/search-query.dto';
 import { SearchResultsDto } from './dto/search-result.dto';
-import { SearchSuggestionsDto, SearchSuggestionDto } from './dto/suggestion.dto';
+import { SearchSuggestionsDto } from './dto/suggestion.dto';
 import { SaveSearchHistoryDto, SearchHistoryEntryDto } from './dto/search-history.dto';
 
 @ApiTags('Search')

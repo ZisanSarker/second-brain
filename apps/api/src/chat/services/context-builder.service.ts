@@ -43,7 +43,7 @@ export class ContextBuilderService {
       const text = hit.matchedContent || hit.description || '';
       if (!text.trim()) continue;
 
-      const tokenEstimate = Math.ceil(text.length * this.tokensPerChar);
+      void Math.ceil(text.length * this.tokensPerChar);
       chunks.push({
         text,
         score: hit.score,

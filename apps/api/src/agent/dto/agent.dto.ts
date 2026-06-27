@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsObject, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsObject } from 'class-validator';
 
 export class RunAgentDto {
   @IsString()

@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { BaseAgent, AgentResult } from './base-agent';
-import { OpenRouterProvider } from '../../chat/providers/openrouter.provider';
-import { ToolRegistry } from '../tools/tool-registry';
-import { ExecutionService } from '../execution.service';
-import { MemoryService } from '../memory.service';
-import { LlmReasonerService } from '../llm-reasoner.service';
 
 @Injectable()
 export class DocumentationAgent extends BaseAgent {

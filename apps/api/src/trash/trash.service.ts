@@ -13,7 +13,7 @@ export class TrashService {
     await this.requireMember(workspaceId, userId);
     const skip = (page - 1) * limit;
 
-    const [documents, collections, docTotal, colTotal] = await Promise.all([
+    const [documents, collections, docTotal] = await Promise.all([
       this.prisma.document.findMany({
         where: { workspaceId, deletedAt: { not: null } },
         skip,

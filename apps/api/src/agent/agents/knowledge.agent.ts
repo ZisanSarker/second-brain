@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { BaseAgent, AgentResult } from './base-agent';
-import { OpenRouterProvider } from '../../chat/providers/openrouter.provider';
-import { ToolRegistry } from '../tools/tool-registry';
-import { ExecutionService } from '../execution.service';
-import { MemoryService } from '../memory.service';
-import { LlmReasonerService } from '../llm-reasoner.service';
 
 @Injectable()
 export class KnowledgeAgent extends BaseAgent {
@@ -20,7 +15,7 @@ export class KnowledgeAgent extends BaseAgent {
     workspaceId: string,
     userId: string,
     input: any,
-    context?: Record<string, any>,
+    _context?: Record<string, any>,
   ): Promise<AgentResult> {
     const question = input.task || input || '';
     const searchResults = await this.toolRegistry.executeTool(workspaceId, userId, 'search', {

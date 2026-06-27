@@ -73,7 +73,7 @@ export class SchedulerService {
     });
   }
 
-  private computeNextRun(cron: string): Date {
+  private computeNextRun(_cron: string): Date {
     return new Date(Date.now() + 60 * 60 * 1000);
   }
 }
