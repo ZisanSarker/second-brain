@@ -31,12 +31,14 @@ import { JobsModule } from './jobs/jobs.module';
 import { SharedModule } from './shared/shared.module';
 import { AgentModule } from './agent/agent.module';
 import { HealthModule } from './health/health.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '../../.env',
     }),
 
     // Rate Limiting
@@ -96,6 +98,7 @@ import { HealthModule } from './health/health.module';
     SharedModule,
     AgentModule,
     HealthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

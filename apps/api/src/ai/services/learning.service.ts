@@ -31,7 +31,7 @@ export class LearningService extends AiGenerationBaseService {
         collectionId: collectionId || null,
         type: type as any,
         content: result.content,
-        model: 'openai/gpt-4o',
+        model: this.getDefaultModel(),
         tags: [],
       },
     });

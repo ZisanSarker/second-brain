@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../shared/services/prisma.service';
+import { MailService } from '../../email/mail.service';
 import { NotificationsService } from './notifications.service';
 
 describe('NotificationsService', () => {
@@ -19,11 +20,22 @@ describe('NotificationsService', () => {
       findMany: jest.fn(),
       upsert: jest.fn(),
     },
+    user: {
+      findUnique: jest.fn(),
+    },
+  };
+
+  const mockMail = {
+    sendMail: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [NotificationsService, { provide: PrismaService, useValue: mockPrisma }],
+      providers: [
+        NotificationsService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: MailService, useValue: mockMail },
+      ],
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);

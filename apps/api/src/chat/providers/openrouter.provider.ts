@@ -30,7 +30,10 @@ export class OpenRouterProvider implements LlmProvider {
   constructor(private config: ConfigService) {
     this.baseUrl = this.config.get<string>('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1');
     this.apiKey = this.config.get<string>('OPENROUTER_API_KEY', '');
-    this.defaultModel = this.config.get<string>('OPENROUTER_MODEL', 'openai/gpt-4o');
+    this.defaultModel = this.config.get<string>(
+      'OPENROUTER_MODEL',
+      'google/gemma-4-26b-a4b-it:free',
+    );
   }
 
   generateChatStream(options: ChatStreamOptions): Observable<string> {

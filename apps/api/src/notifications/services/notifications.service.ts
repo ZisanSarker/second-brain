@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/services/prisma.service';
+import { MailService } from '../../email/mail.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
 
   async create(data: {
     workspaceId: string;
@@ -19,7 +23,7 @@ export class NotificationsService {
     });
     if (setting && !setting.inApp) return null;
 
-    return this.prisma.notification.create({
+    const notification = await this.prisma.notification.create({
       data: {
         workspaceId: data.workspaceId,
         userId: data.userId,
@@ -29,6 +33,22 @@ export class NotificationsService {
         data: (data.data ?? {}) as Prisma.InputJsonValue,
       },
     });
+
+    if (setting?.email !== false) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: data.userId },
+        select: { email: true },
+      });
+      if (user) {
+        await this.mail.sendMail({
+          to: user.email,
+          subject: data.title,
+          html: `<p>${data.body || data.title}</p>`,
+        });
+      }
+    }
+
+    return notification;
   }
 
   async list(

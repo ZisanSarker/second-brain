@@ -95,7 +95,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send email verification link' })
   async sendVerification(@CurrentUser('id') userId: string) {
-    const token = await this.auth.generateVerificationToken(userId);
-    return { verificationToken: token };
+    await this.auth.generateVerificationToken(userId);
+    return { message: 'Verification email sent.' };
   }
 }

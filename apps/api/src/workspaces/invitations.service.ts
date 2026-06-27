@@ -6,11 +6,16 @@ import {
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../shared/services/prisma.service';
+import { MailService } from '../email/mail.service';
+import { workspaceInviteTemplate } from '../email/templates/workspace-invite.template';
 import { CreateInvitationDto } from './dto/workspace.dto';
 
 @Injectable()
 export class InvitationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
 
   async create(workspaceId: string, userId: string, dto: CreateInvitationDto) {
     // Verify inviter has admin role
@@ -71,9 +76,20 @@ export class InvitationsService {
       },
     });
 
+    const inviteUrl = `/invitations/${token}`;
+
+    const inviter = await this.prisma.user.findUnique({ where: { id: userId } });
+    const inviterName = inviter?.name || inviter?.email || 'Someone';
+
+    await this.mail.sendMail({
+      to: dto.email,
+      subject: `You've been invited to ${invitation.workspace.name}`,
+      html: workspaceInviteTemplate(inviteUrl, invitation.workspace.name, inviterName),
+    });
+
     return {
       ...invitation,
-      inviteUrl: `/invitations/${token}`,
+      inviteUrl,
     };
   }
 

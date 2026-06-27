@@ -79,7 +79,7 @@ describe('Chat Module', () => {
             get: jest.fn((key: string, defaultValue?: string) => {
               if (key === 'OPENROUTER_API_KEY') return 'test-key';
               if (key === 'OPENROUTER_BASE_URL') return 'https://openrouter.ai/api/v1';
-              if (key === 'OPENROUTER_MODEL') return 'openai/gpt-4o';
+              if (key === 'OPENROUTER_MODEL') return 'google/gemma-4-31b-it:free';
               return defaultValue;
             }),
           },

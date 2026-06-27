@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { OpenRouterProvider } from '../../chat/providers/openrouter.provider';
 import { PrismaService } from '../../shared/services/prisma.service';
 import { ContentService } from './content.service';
@@ -15,7 +16,12 @@ export abstract class AiGenerationBaseService {
     protected readonly contentService: ContentService,
     protected readonly promptBuilder: AiPromptBuilderService,
     protected readonly taskService: TaskService,
+    protected readonly config: ConfigService,
   ) {}
+
+  protected getDefaultModel(): string {
+    return this.config.get<string>('OPENROUTER_MODEL', 'google/gemma-4-31b-it:free');
+  }
 
   abstract readonly type: GeneratedContentType;
 
@@ -46,9 +52,11 @@ export abstract class AiGenerationBaseService {
       { role: 'user', content: finalUserPrompt },
     ];
 
+    const model = options?.model || this.getDefaultModel();
+
     const result = await this.llmProvider.generateChat({
       messages,
-      model: options?.model || 'openai/gpt-4o',
+      model,
     });
 
     const parsed = this.tryParseJson(result.content);
@@ -60,7 +68,7 @@ export abstract class AiGenerationBaseService {
         collectionId: collectionId || null,
         type: this.type,
         content: parsed,
-        model: options?.model || 'openai/gpt-4o',
+        model,
         tags: [],
       },
     });

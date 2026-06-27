@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../shared/services/prisma.service';
+import { MailService } from '../email/mail.service';
 
 jest.mock('bcrypt');
 
@@ -42,6 +43,12 @@ describe('AuthService', () => {
       update: jest.fn(),
       updateMany: jest.fn(),
     },
+    resetToken: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    $transaction: jest.fn((cb: any) => cb),
   };
 
   const mockJwt = {
@@ -53,19 +60,22 @@ describe('AuthService', () => {
     get: jest.fn((key: string, defaultValue?: string) => {
       const config: Record<string, string> = {
         JWT_SECRET: 'test-secret',
-        JWT_REFRESH_SECRET: 'test-refresh-secret',
         JWT_EXPIRES_IN: '15m',
+        NEXT_PUBLIC_API_URL: 'http://localhost:3000',
       };
       return config[key] ?? defaultValue;
     }),
     getOrThrow: jest.fn((key: string) => {
       const config: Record<string, string> = {
         JWT_SECRET: 'test-secret',
-        JWT_REFRESH_SECRET: 'test-refresh-secret',
         JWT_EXPIRES_IN: '15m',
       };
       return config[key];
     }),
+  };
+
+  const mockMail = {
+    sendMail: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(async () => {
@@ -75,6 +85,7 @@ describe('AuthService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: JwtService, useValue: mockJwt },
         { provide: ConfigService, useValue: mockConfig },
+        { provide: MailService, useValue: mockMail },
       ],
     }).compile();
 
@@ -253,22 +264,71 @@ describe('AuthService', () => {
 
   describe('verifyEmail', () => {
     it('should mark email as verified', async () => {
-      const token = Buffer.from('test@example.com').toString('base64');
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.resetToken.findFirst.mockResolvedValue({
+        id: 'rt-1',
+        userId: 'user-1',
+        tokenHash: 'hash',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 3600000),
+      });
 
-      const result = await service.verifyEmail(token);
+      const result = await service.verifyEmail('valid-token');
 
       expect(result.message).toBe('Email verified successfully.');
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({
-        where: { id: 'user-1' },
-        data: { emailVerified: true },
-      });
+      expect(mockPrisma.$transaction).toHaveBeenCalled();
     });
 
     it('should throw if token is invalid', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.resetToken.findFirst.mockResolvedValue(null);
 
       await expect(service.verifyEmail('invalid')).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('forgotPassword', () => {
+    it('should send reset email if user exists', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.resetToken.create.mockResolvedValue({ id: 'rt-1' });
+
+      const result = await service.forgotPassword({ email: 'test@example.com' });
+
+      expect(result.message).toBe('If the email exists, a reset link has been sent.');
+      expect(mockPrisma.resetToken.create).toHaveBeenCalled();
+      expect(mockMail.sendMail).toHaveBeenCalled();
+    });
+
+    it('should not send email if user does not exist', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.forgotPassword({ email: 'unknown@example.com' });
+
+      expect(result.message).toBe('If the email exists, a reset link has been sent.');
+      expect(mockMail.sendMail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset password with valid token', async () => {
+      mockPrisma.resetToken.findFirst.mockResolvedValue({
+        id: 'rt-1',
+        userId: 'user-1',
+        tokenHash: 'hash',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 3600000),
+      });
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+
+      const result = await service.resetPassword({ token: 'valid-token', password: 'NewPass123' });
+
+      expect(result.message).toBe('Password has been reset successfully.');
+    });
+
+    it('should throw with invalid token', async () => {
+      mockPrisma.resetToken.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.resetPassword({ token: 'invalid-token', password: 'NewPass123' }),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 });

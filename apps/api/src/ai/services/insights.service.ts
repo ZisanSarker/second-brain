@@ -37,7 +37,7 @@ export class InsightsService extends AiGenerationBaseService {
         workspaceId: ws,
         type: 'SUMMARY',
         content: { text: result.content, type: 'cross_document_insights', documentIds },
-        model: 'openai/gpt-4o',
+        model: this.getDefaultModel(),
         tags: ['cross-document', 'insights'],
       },
     });
@@ -71,7 +71,7 @@ export class InsightsService extends AiGenerationBaseService {
         workspaceId,
         type: 'SUMMARY',
         content: { text: result.content, type: 'workspace_trends' },
-        model: 'openai/gpt-4o',
+        model: this.getDefaultModel(),
         tags: ['trends', 'workspace-analysis'],
       },
     });

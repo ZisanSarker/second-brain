@@ -1,0 +1,15 @@
+export function passwordResetTemplate(resetUrl: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: sans-serif; padding: 32px; max-width: 600px; margin: 0 auto;">
+  <h2>Reset Your Password</h2>
+  <p>We received a request to reset your password. Click the link below to set a new one:</p>
+  <p><a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: #fff; text-decoration: none; border-radius: 6px;">Reset Password</a></p>
+  <p>This link expires in 1 hour. If you did not request this, you can safely ignore this email.</p>
+  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+  <p style="color: #6b7280; font-size: 12px;">Second Brain — Your AI-powered knowledge management system</p>
+</body>
+</html>`;
+}

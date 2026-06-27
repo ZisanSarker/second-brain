@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { OpenRouterProvider } from '../chat/providers/openrouter.provider';
 import { MemoryService } from './memory.service';
 import { ChatMessage } from '../chat/providers/llm-provider.interface';
@@ -8,6 +9,7 @@ export class LlmReasonerService {
   constructor(
     private llmProvider: OpenRouterProvider,
     private memoryService: MemoryService,
+    private config: ConfigService,
   ) {}
 
   async reason(
@@ -22,7 +24,8 @@ export class LlmReasonerService {
 
     const result = await this.llmProvider.generateChat({
       messages: chatMessages,
-      model: options?.model || 'openai/gpt-4o',
+      model:
+        options?.model || this.config.get<string>('OPENROUTER_MODEL', 'google/gemma-4-31b-it:free'),
       temperature: options?.temperature ?? 0.7,
       maxTokens: options?.maxTokens ?? 4096,
     });

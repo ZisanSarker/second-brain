@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { PrismaService } from '../shared/services/prisma.service';
+import { MailService } from '../email/mail.service';
 
 describe('InvitationsService', () => {
   let service: InvitationsService;
@@ -26,6 +27,10 @@ describe('InvitationsService', () => {
     $transaction: jest.fn(),
   };
 
+  const mockMail = {
+    sendMail: jest.fn().mockResolvedValue(undefined),
+  };
+
   const mockInvitation = {
     id: 'inv-1',
     workspaceId: 'ws-1',
@@ -41,7 +46,11 @@ describe('InvitationsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [InvitationsService, { provide: PrismaService, useValue: mockPrisma }],
+      providers: [
+        InvitationsService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: MailService, useValue: mockMail },
+      ],
     }).compile();
 
     service = module.get<InvitationsService>(InvitationsService);
@@ -57,7 +66,9 @@ describe('InvitationsService', () => {
         userId: 'user-1',
         role: 'ADMIN',
       });
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 'user-1', name: 'Admin', email: 'admin@example.com' });
       mockPrisma.workspaceInvitation.findFirst.mockResolvedValue(null);
       mockPrisma.workspaceInvitation.create.mockResolvedValue(mockInvitation);
 
