@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AgentController } from './agent.controller';
 import { AgentService } from './agent.service';
@@ -82,7 +82,7 @@ import { SharedModule } from '../shared/shared.module';
     SchedulerService,
   ],
 })
-export class AgentModule {
+export class AgentModule implements OnModuleInit {
   constructor(
     private router: AgentRouterService,
     private knowledgeAgent: KnowledgeAgent,
@@ -100,7 +100,9 @@ export class AgentModule {
     private flashcardTool: FlashcardGeneratorTool,
     private mindmapTool: MindMapGeneratorTool,
     private notifTool: NotificationTool,
-  ) {
+  ) {}
+
+  onModuleInit() {
     this.router.register(this.knowledgeAgent);
     this.router.register(this.researchAgent);
     this.router.register(this.documentationAgent);

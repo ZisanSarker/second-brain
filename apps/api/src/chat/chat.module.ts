@@ -31,9 +31,12 @@ const LLM_PROVIDER = 'LLM_PROVIDER';
         const provider = config.get<string>('LLM_PROVIDER', 'openrouter');
         switch (provider) {
           case 'openai-compat':
+          case 'openrouter':
             return new OpenAiCompatProvider(config);
           default:
-            return new OpenAiCompatProvider(config);
+            throw new Error(
+              `Unknown LLM provider: ${provider}. Supported: openai-compat, openrouter`,
+            );
         }
       },
       inject: [ConfigService],
