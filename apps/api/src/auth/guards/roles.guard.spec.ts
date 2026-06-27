@@ -29,7 +29,8 @@ describe('RolesGuard', () => {
       switchToHttp: () => ({
         getRequest: () => ({
           user: userId ? { id: userId } : undefined,
-          params: workspaceId ? { workspaceId } : {},
+          headers: workspaceId ? { 'x-workspace-id': workspaceId } : {},
+          params: {},
         }),
       }),
       getHandler: () => {},

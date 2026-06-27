@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   FileText,
@@ -26,6 +26,7 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
+  Share2,
 } from 'lucide-react';
 import {
   useDocument,
@@ -37,6 +38,9 @@ import {
   useRetryProcessing,
 } from '@/lib/hooks/useDocuments';
 import { useRemoveTag } from '@/lib/hooks/useDocuments';
+import { useHeartbeat } from '@/lib/hooks/usePresence';
+import { CommentSidebar } from '@/components/comments/CommentSidebar';
+import { ShareDialog } from '@/components/sharing/ShareDialog';
 import type { DocumentVersion } from '@second-brain/types';
 
 const fileTypeIcons: Record<string, typeof FileText> = {
@@ -137,6 +141,16 @@ export default function DocumentDetailPage() {
   const [editAuthor, setEditAuthor] = useState('');
   const [showVersions, setShowVersions] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const heartbeat = useHeartbeat();
+
+  useEffect(() => {
+    heartbeat.mutate({ status: 'ACTIVE', currentDocumentId: id });
+    return () => {
+      heartbeat.mutate({ status: 'AWAY' });
+    };
+  }, [id]);
 
   const startEditing = () => {
     if (!doc) return;
@@ -236,6 +250,20 @@ export default function DocumentDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setShowShare(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            Share
+          </button>
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+            Comments
+          </button>
+          <button
             onClick={handleDownload}
             disabled={downloading}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all disabled:opacity-50"
@@ -271,7 +299,17 @@ export default function DocumentDetailPage() {
             </button>
           )}
         </div>
+        {showShare && (
+          <ShareDialog entityType="DOCUMENT" entityId={id} onClose={() => setShowShare(false)} />
+        )}
       </header>
+      {showComments && (
+        <CommentSidebar
+          entityType="DOCUMENT"
+          entityId={id}
+          onClose={() => setShowComments(false)}
+        />
+      )}
 
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-4xl mx-auto space-y-6">

@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useDeleteContent } from '@/lib/hooks/useAi';
-import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronUp, MessageSquare, Share2 } from 'lucide-react';
+import { CommentSidebar } from '@/components/comments/CommentSidebar';
+import { ShareDialog } from '@/components/sharing/ShareDialog';
 
 function formatContent(content: any): string {
   if (typeof content === 'string') return content;
@@ -16,6 +18,8 @@ function isJsonContent(content: any): boolean {
 
 export function ContentCard({ item, onDeleted }: { item: any; onDeleted?: () => void }) {
   const [expanded, setExpanded] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const deleteContent = useDeleteContent();
   const formatted = formatContent(item.content);
   const isJson = isJsonContent(item.content);
@@ -39,6 +43,20 @@ export function ContentCard({ item, onDeleted }: { item: any; onDeleted?: () => 
         </div>
         <div className="flex items-center gap-1">
           <button
+            onClick={() => setShowComments(true)}
+            className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+            title="Comments"
+          >
+            <MessageSquare size={14} />
+          </button>
+          <button
+            onClick={() => setShowShare(true)}
+            className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+            title="Share"
+          >
+            <Share2 size={14} />
+          </button>
+          <button
             onClick={() => setExpanded(!expanded)}
             className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
           >
@@ -61,6 +79,21 @@ export function ContentCard({ item, onDeleted }: { item: any; onDeleted?: () => 
             <div className="prose prose-invert prose-sm max-w-none text-zinc-300">{formatted}</div>
           )}
         </div>
+      )}
+
+      {showComments && (
+        <CommentSidebar
+          entityType="GENERATED_CONTENT"
+          entityId={item.id}
+          onClose={() => setShowComments(false)}
+        />
+      )}
+      {showShare && (
+        <ShareDialog
+          entityType="GENERATED_CONTENT"
+          entityId={item.id}
+          onClose={() => setShowShare(false)}
+        />
       )}
     </div>
   );
