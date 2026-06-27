@@ -12,6 +12,11 @@ apiClient.interceptors.request.use((config) => {
       const { accessToken } = JSON.parse(tokens);
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+    const workspace = localStorage.getItem('current_workspace');
+    if (workspace) {
+      const { id } = JSON.parse(workspace);
+      config.headers['x-workspace-id'] = id;
+    }
   }
   return config;
 });

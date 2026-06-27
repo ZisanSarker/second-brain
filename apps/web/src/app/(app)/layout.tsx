@@ -12,13 +12,26 @@ import {
   Users,
   LogOut,
   ChevronDown,
+  FileText,
+  Tags,
+  Upload,
+  Clock,
+  Heart,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const sidebarLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/workspaces', label: 'Workspaces', icon: Library },
+  { href: '/documents', label: 'Documents', icon: FileText },
+  { href: '/collections', label: 'Collections', icon: Library },
+  { href: '/tags', label: 'Tags', icon: Tags },
+  { href: '/upload', label: 'Upload', icon: Upload },
+  { href: '/recent', label: 'Recent', icon: Clock },
+  { href: '/favorites', label: 'Favorites', icon: Heart },
+  { href: '/trash', label: 'Trash', icon: Trash2 },
+  { href: '/workspaces', label: 'Workspaces', icon: Users },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
