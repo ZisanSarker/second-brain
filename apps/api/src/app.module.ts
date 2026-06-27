@@ -31,8 +31,6 @@ import { ActivityModule } from './activity/activity.module';
 import { AuditModule } from './audit/audit.module';
 import { PresenceModule } from './presence/presence.module';
 import { SharingModule } from './sharing/sharing.module';
-import { AutomationModule } from './automation/automation.module';
-import { SettingsModule } from './settings/settings.module';
 import { JobsModule } from './jobs/jobs.module';
 import { SharedModule } from './shared/shared.module';
 import { AgentModule } from './agent/agent.module';
@@ -83,9 +81,6 @@ import { AgentModule } from './agent/agent.module';
     AuditModule,
     PresenceModule,
     SharingModule,
-    TeamsModule,
-    AutomationModule,
-    SettingsModule,
     JobsModule,
     SharedModule,
     AgentModule,
