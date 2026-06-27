@@ -1,37 +1,473 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
+enum UserRole {
+  OWNER
+  ADMIN
+  EDITOR
+  MEMBER
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum DocStatus {
+  PENDING_UPLOAD
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum ImportType {
+  FILE
+  WEBSITE
+  GITHUB
+  YOUTUBE
+}
+
+enum JobStatus {
+  WAITING
+  ACTIVE
+  COMPLETED
+  FAILED
+  RETRYING
+}
+
+enum FileStatus {
+  TEMP
+  PROCESSING
+  PERSISTED
+  FAILED
+}
+
+enum GeneratedContentType {
+  SUMMARY
+  FLASHCARD
+  QUIZ
+  NOTES
+  MINDMAP
+}
+
+enum NotificationType {
+  DOCUMENT_READY
+  IMPORT_COMPLETE
+  SUMMARY_READY
+  MEMBER_JOINED
+  MEMBER_LEFT
+  COMMENT_ADDED
+  DOCUMENT_SHARED
+  JOB_FAILED
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String            @id @default(uuid())
+  email            String            @unique
+  passwordHash     String
+  name             String?
+  avatarUrl        String?
+  bio              String?
+  status           UserStatus        @default(ACTIVE)
+  emailVerified    Boolean           @default(false)
+  lastLogin        DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  deletedAt        DateTime?
+  memberships      WorkspaceMember[]
+  conversations    Conversation[]
+  sentMessages     Message[]
+  auditLogs        AuditLog[]
+  settings         UserSettings?
+  notifications    Notification[]
+  uploadedFiles    File[]
+  searchHistory    SearchHistory[]
+  comments         Comment[]
+
+  @@index([email])
 }
 
 model Workspace {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String                @id @default(uuid())
+  name        String
+  slug        String                @unique
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  deletedAt   DateTime?
+  members     WorkspaceMember[]
+  collections Collection[]
+  folders     Folder[]
+  documents   Document[]
+  apiKeys     APIKey[]
+  invitations WorkspaceInvitation[]
+  jobs        BackgroundJob[]
+  auditLogs   AuditLog[]
+  conversations Conversation[]
+  settings    WorkspaceSettings?
+  notifications Notification[]
+  files       File[]
+  searchHistory SearchHistory[]
+
+  @@index([slug])
+}
+
+model WorkspaceMember {
+  id          String     @id @default(uuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        UserRole   @default(MEMBER)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([role])
+}
+
+model WorkspaceInvitation {
+  id          String     @id @default(uuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  role        UserRole   @default(MEMBER)
+  token       String     @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  rejectedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([token])
+  @@index([email])
+}
+
+model APIKey {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  keyHash     String    @unique
+  scopes      String[]  @default([])
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+
+  @@index([keyHash])
+}
+
+model Collection {
+  id          String     @id @default(uuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  documents   Document[]
+
+  @@index([workspaceId])
+}
+
+model Folder {
+  id          String     @id @default(uuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      Folder?    @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[]   @relation("FolderHierarchy")
+  name        String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  documents   Document[]
+
+  @@index([workspaceId])
 }
 
 model Document {
-  id           String   @id @default(uuid())
-  title        String
-  content      String?
-  fileUrl      String?
-  fileType     String
+  id           String            @id @default(uuid())
   workspaceId  String
+  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   collectionId String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  collection   Collection?       @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  folderId     String?
+  folder       Folder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  title        String
+  sourceType   ImportType        @default(FILE)
+  status       DocStatus         @default(PENDING_UPLOAD)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+  versions     DocumentVersion[]
+  tags         Tag[]             @relation("DocumentTags")
+  imports      DocumentImport[]
+  generated    GeneratedContent[]
+  comments     Comment[]
+  files        File[]
+  sharedLinks  SharedLink[]
+
+  @@index([workspaceId])
+  @@index([collectionId])
+  @@index([status])
+}
+
+model DocumentVersion {
+  id            String          @id @default(uuid())
+  documentId    String
+  document      Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  storageKey    String
+  fileName      String
+  fileSize      BigInt
+  mimeType      String
+  checksum      String
+  createdAt     DateTime        @default(now())
+  chunks        DocumentChunk[]
+
+  @@index([documentId])
+}
+
+model DocumentChunk {
+  id         String          @id @default(uuid())
+  versionId  String
+  version    DocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  chunkIndex Int
+  pageNumber Int?
+  content    String
+  charStart  Int
+  charEnd    Int
+  metadata   Json            @default("{}")
+  createdAt  DateTime        @default(now())
+  citations  Citation[]
+
+  @@index([versionId])
+}
+
+model Tag {
+  id          String     @id @default(uuid())
+  workspaceId String
+  name        String
+  color       String     @default("#6B7280")
+  documents   Document[] @relation("DocumentTags")
+
+  @@unique([workspaceId, name])
+}
+
+model Conversation {
+  id          String     @id @default(uuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creatorId   String?
+  creator     User?      @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  title       String     @default("New Chat")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  messages    Message[]
+
+  @@index([workspaceId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String?
+  sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  role           String
+  content        String
+  feedbackRating Int?
+  feedbackText   String?
+  createdAt      DateTime     @default(now())
+  citations      Citation[]
+
+  @@index([conversationId, createdAt])
+}
+
+model Citation {
+  id             String        @id @default(uuid())
+  messageId      String
+  message        Message       @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  chunkId        String
+  chunk          DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  relevanceScore Float
+  createdAt      DateTime      @default(now())
+
+  @@index([messageId])
+}
+
+model BackgroundJob {
+  id           String    @id @default(uuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  jobType      String
+  status       JobStatus @default(WAITING)
+  progress     Int       @default(0)
+  errorMessage String?
+  meta         Json      @default("{}")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([status, createdAt])
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String
+  ipAddress   String?
+  details     Json      @default("{}")
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId])
+}
+
+model File {
+  id            String     @id @default(uuid())
+  workspaceId   String
+  workspace     Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploadedById  String?
+  uploadedBy    User?      @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  documentId    String?
+  document      Document?  @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  storageKey    String
+  originalName  String
+  fileSize      BigInt
+  mimeType      String
+  status        FileStatus @default(TEMP)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([documentId])
+}
+
+model DocumentImport {
+  id          String     @id @default(uuid())
+  documentId  String
+  document    Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  importType  ImportType
+  sourceUrl   String?
+  metadata    Json       @default("{}")
+  createdAt   DateTime   @default(now())
+
+  @@index([documentId])
+  @@unique([documentId, importType])
+}
+
+model GeneratedContent {
+  id          String               @id @default(uuid())
+  documentId  String
+  document    Document             @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  type        GeneratedContentType
+  content     Json
+  model       String               @default("openai/gpt-4o")
+  createdBy   String?
+  createdAt   DateTime             @default(now())
+
+  @@index([documentId, type])
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  workspaceId String
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  body        String?
+  data        Json             @default("{}")
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([userId, readAt])
+  @@index([workspaceId, createdAt])
+}
+
+model SearchHistory {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  query       String
+  filters     Json     @default("{}")
+  resultCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId, userId, createdAt])
+  @@index([query])
+}
+
+model UserSettings {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme       String   @default("dark")
+  language    String   @default("en")
+  preferences Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WorkspaceSettings {
+  id              String   @id @default(uuid())
+  workspaceId     String   @unique
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  aiModel         String   @default("openai/gpt-4o")
+  embeddingModel  String   @default("sentence-transformers/all-MiniLM-L6-v2")
+  chunkSize       Int      @default(500)
+  chunkOverlap    Int      @default(50)
+  maxTokens       Int      @default(4096)
+  temperature     Float    @default(0.7)
+  preferences     Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Comment {
+  id          String    @id @default(uuid())
+  documentId  String
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String
+  parentId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([documentId, createdAt])
+  @@index([userId])
+}
+
+model SharedLink {
+  id              String    @id @default(uuid())
+  documentId      String
+  document        Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdBy       String
+  token           String    @unique
+  permission      String    @default("VIEWER")
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+  lastAccessedAt  DateTime?
+
+  @@index([token])
+  @@index([documentId])
 }
