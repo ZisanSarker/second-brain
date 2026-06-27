@@ -86,6 +86,43 @@ enum NotificationType {
   COMMENT_ADDED
   DOCUMENT_SHARED
   JOB_FAILED
+  MENTIONED
+  AI_TASK_COMPLETED
+  VERSION_RESTORED
+  PERMISSION_CHANGED
+  INVITATION_SENT
+  SHARING_CHANGED
+}
+
+enum ActivityType {
+  DOCUMENT_CREATED
+  DOCUMENT_UPDATED
+  DOCUMENT_DELETED
+  COMMENT_ADDED
+  MEMBER_JOINED
+  MEMBER_LEFT
+  WORKSPACE_UPDATED
+  AI_TASK_COMPLETED
+  VERSION_RESTORED
+  PERMISSION_CHANGED
+  SHARING_CHANGED
+  INVITATION_SENT
+  DOCUMENT_SHARED
+}
+
+enum ReactionType {
+  LIKE
+  CELEBRATE
+  SUPPORT
+  INSIGHTFUL
+  QUESTION
+}
+
+enum PresenceStatus {
+  ONLINE
+  AWAY
+  BUSY
+  OFFLINE
 }
 
 model User {
@@ -107,9 +144,16 @@ model User {
   auditLogs        AuditLog[]
   settings         UserSettings?
   notifications    Notification[]
+  activity         Activity[]
   uploadedFiles    File[]
   searchHistory    SearchHistory[]
   comments         Comment[]
+  reactions        Reaction[]
+  mentions         Mention[]
+  resourcePermissions ResourcePermission[]
+  presence         Presence[]
+  notificationSettings NotificationSetting[]
+  teamMemberships  TeamMember[]
   refreshTokens    RefreshToken[]
   documentsOwned   Document[]
   favorites        Favorite[]
@@ -141,6 +185,11 @@ model Workspace {
   searchHistory SearchHistory[]
   aiTemplates   AiTemplate[]
   aiTasks       AiTask[]
+  teams         Team[]
+  activity      Activity[]
+  presence      Presence[]
+  resourcePermissions ResourcePermission[]
+  mentions      Mention[]
   generatedContent GeneratedContent[]
 
   @@index([slug])
@@ -205,6 +254,8 @@ model Collection {
   archivedAt       DateTime?
   documents        Document[]
   generatedContent GeneratedContent[]
+  comments         Comment[]          @relation("CollectionComments")
+  sharedLinks      SharedLink[]       @relation("CollectionSharedLinks")
 
   @@index([workspaceId])
 }
@@ -480,6 +531,8 @@ model GeneratedContent {
   model        String               @default("openai/gpt-4o")
   tags         String[]             @default([])
   createdBy    String?
+  comments     Comment[]            @relation("GeneratedContentComments")
+  sharedLinks  SharedLink[]         @relation("GeneratedContentSharedLinks")
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
 
@@ -589,34 +642,170 @@ model WorkspaceSettings {
 }
 
 model Comment {
-  id          String    @id @default(uuid())
-  documentId  String
-  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content     String
-  parentId    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id                 String      @id @default(uuid())
+  documentId         String?
+  document           Document?   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  collectionId       String?
+  collection         Collection? @relation("CollectionComments", fields: [collectionId], references: [id], onDelete: Cascade)
+  generatedContentId String?
+  generatedContent   GeneratedContent? @relation("GeneratedContentComments", fields: [generatedContentId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content            String
+  parentId           String?
+  parent             Comment?    @relation("CommentThread", fields: [parentId], references: [id], onDelete: SetNull)
+  replies            Comment[]   @relation("CommentThread")
+  editedAt           DateTime?
+  resolvedAt         DateTime?
+  resolvedBy         String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  deletedAt          DateTime?
 
   @@index([documentId, createdAt])
+  @@index([collectionId, createdAt])
+  @@index([generatedContentId, createdAt])
+  @@index([userId])
+}
+
+model Reaction {
+  id         String       @id @default(uuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entityType String       // COMMENT | DOCUMENT | GENERATED_CONTENT
+  entityId   String
+  type       ReactionType
+  createdAt  DateTime     @default(now())
+
+  @@unique([entityType, entityId, userId, type])
+  @@index([entityType, entityId])
+}
+
+model Mention {
+  id             String   @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  entityType     String   // COMMENT | DOCUMENT | GENERATED_CONTENT
+  entityId       String
+  mentionerId    String
+  mentionedUserId String
+  mentionedUser  User     @relation(fields: [mentionedUserId], references: [id], onDelete: Cascade)
+  startIndex     Int?
+  endIndex       Int?
+  createdAt      DateTime @default(now())
+
+  @@index([mentionedUserId])
+  @@index([entityType, entityId])
+  @@index([workspaceId])
+}
+
+model ResourcePermission {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  entityType  String   // DOCUMENT | COLLECTION | GENERATED_CONTENT
+  entityId    String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String   // OWNER | EDITOR | COMMENTER | VIEWER
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([entityType, entityId, userId])
+  @@index([entityType, entityId])
+  @@index([userId])
+}
+
+model Activity {
+  id          String       @id @default(uuid())
+  workspaceId String
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  type        ActivityType
+  entityType  String?
+  entityId    String?
+  metadata    Json         @default("{}")
+  createdAt   DateTime     @default(now())
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type])
+}
+
+model Presence {
+  id               String          @id @default(uuid())
+  workspaceId      String
+  workspace        Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           PresenceStatus  @default(ONLINE)
+  currentDocumentId String?
+  lastSeenAt       DateTime        @default(now()) @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId, lastSeenAt(sort: Desc)])
+}
+
+model NotificationSetting {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  enabled   Boolean          @default(true)
+  email     Boolean          @default(true)
+  inApp     Boolean          @default(true)
+
+  @@unique([userId, type])
+  @@index([userId])
+}
+
+model Team {
+  id          String        @id @default(uuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  members     TeamMember[]
+
+  @@unique([workspaceId, name])
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("MEMBER")
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, userId])
   @@index([userId])
 }
 
 model SharedLink {
-  id              String    @id @default(uuid())
-  documentId      String
-  document        Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  createdBy       String
-  token           String    @unique
-  permission      String    @default("VIEWER")
-  expiresAt       DateTime?
-  createdAt       DateTime  @default(now())
-  lastAccessedAt  DateTime?
+  id                 String             @id @default(uuid())
+  documentId         String?
+  document           Document?          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  collectionId       String?
+  collection         Collection?        @relation("CollectionSharedLinks", fields: [collectionId], references: [id], onDelete: Cascade)
+  generatedContentId String?
+  generatedContent   GeneratedContent?  @relation("GeneratedContentSharedLinks", fields: [generatedContentId], references: [id], onDelete: Cascade)
+  createdBy          String
+  token              String             @unique
+  permission         String             @default("VIEWER")
+  expiresAt          DateTime?
+  createdAt          DateTime           @default(now())
+  lastAccessedAt     DateTime?
 
   @@index([token])
   @@index([documentId])
+  @@index([collectionId])
 }
 
 model Favorite {
