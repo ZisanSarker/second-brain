@@ -23,6 +23,14 @@ import { SearchModule } from '../search/search.module';
     StreamingService,
     OpenRouterProvider,
   ],
-  exports: [ConversationService, MessageService, CitationService, StreamingService],
+  exports: [
+    ConversationService,
+    MessageService,
+    CitationService,
+    StreamingService,
+    OpenRouterProvider,
+    PromptBuilderService,
+    ContextBuilderService,
+  ],
 })
 export class ChatModule {}
