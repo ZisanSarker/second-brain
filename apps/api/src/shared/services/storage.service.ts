@@ -116,6 +116,14 @@ export class StorageService implements OnModuleInit {
     }
   }
 
+  async healthCheck(): Promise<boolean> {
+    try {
+      return await this.client.bucketExists(this.documentsBucket);
+    } catch {
+      return false;
+    }
+  }
+
   async getObject(key: string, bucket?: string): Promise<Buffer> {
     const targetBucket = bucket ?? this.documentsBucket;
     const stream = await this.client.getObject(targetBucket, key);

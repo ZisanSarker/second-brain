@@ -35,6 +35,7 @@ import { SharingModule } from './sharing/sharing.module';
 import { JobsModule } from './jobs/jobs.module';
 import { SharedModule } from './shared/shared.module';
 import { AgentModule } from './agent/agent.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -108,6 +109,7 @@ import { AgentModule } from './agent/agent.module';
     JobsModule,
     SharedModule,
     AgentModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],
