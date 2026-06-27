@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChatSidebar } from './ChatSidebar';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -29,6 +30,7 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
     resetStream,
   } = useChatStore();
 
+  const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
@@ -69,8 +71,9 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
               setStreamError(parsed.message);
             } else if (parsed.type === 'done') {
               endStream();
-              // Refresh messages
-              window.location.reload();
+              queryClient.invalidateQueries({
+                queryKey: ['chat', 'messages', activeConversationId],
+              });
             }
           } catch {
             // Skip malformed lines
@@ -88,7 +91,15 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
         }
       };
     },
-    [activeConversationId, startStream, addToken, setCitations, endStream, setStreamError],
+    [
+      activeConversationId,
+      startStream,
+      addToken,
+      setCitations,
+      endStream,
+      setStreamError,
+      queryClient,
+    ],
   );
 
   const handleStop = useCallback(() => {
@@ -123,7 +134,7 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
           else if (parsed.type === 'error') setStreamError(parsed.message);
           else if (parsed.type === 'done') {
             endStream();
-            window.location.reload();
+            queryClient.invalidateQueries({ queryKey: ['chat', 'messages', activeConversationId] });
           }
         } catch {}
       }
@@ -136,7 +147,9 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
     setCitations,
     endStream,
     setStreamError,
+    setStreamError,
     resetStream,
+    queryClient,
   ]);
 
   const allMessages = msgData?.data || conv?.messages || [];
