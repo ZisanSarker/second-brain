@@ -9,12 +9,15 @@ export class TrashService {
     private storage: StorageService,
   ) {}
 
-  async findAll(workspaceId: string, userId: string) {
+  async findAll(workspaceId: string, userId: string, page = 1, limit = 50) {
     await this.requireMember(workspaceId, userId);
+    const skip = (page - 1) * limit;
 
-    const [documents, collections] = await Promise.all([
+    const [documents, collections, docTotal, colTotal] = await Promise.all([
       this.prisma.document.findMany({
         where: { workspaceId, deletedAt: { not: null } },
+        skip,
+        take: limit,
         include: {
           collection: { select: { id: true, name: true } },
           tags: { select: { id: true, name: true, color: true } },
@@ -25,9 +28,24 @@ export class TrashService {
         where: { workspaceId, deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
       }),
+      this.prisma.document.count({
+        where: { workspaceId, deletedAt: { not: null } },
+      }),
+      this.prisma.collection.count({
+        where: { workspaceId, deletedAt: { not: null } },
+      }),
     ]);
 
-    return { documents, collections };
+    return {
+      documents,
+      collections,
+      meta: {
+        total: docTotal,
+        page,
+        limit,
+        totalPages: Math.ceil(docTotal / limit),
+      },
+    };
   }
 
   async restoreDocument(workspaceId: string, documentId: string, userId: string) {

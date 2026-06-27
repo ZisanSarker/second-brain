@@ -8,11 +8,14 @@ import {
   Post,
   Query,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard, Roles } from '../auth/guards/roles.guard';
 import { CurrentUser, WorkspaceId } from '../auth/decorators/current-user.decorator';
 import { DocumentsService } from './documents.service';
+import { ALLOWED_EXTENSIONS, AllowedExtension } from './constants/upload.constants';
 import {
   CreateDocumentDto,
   UpdateDocumentDto,
@@ -196,6 +199,12 @@ export class DocumentsController {
     @WorkspaceId() workspaceId: string,
     @Query('fileName') fileName: string,
   ) {
+    const ext = fileName.toLowerCase().slice(fileName.lastIndexOf('.'));
+    if (!ALLOWED_EXTENSIONS.includes(ext as AllowedExtension)) {
+      throw new BadRequestException(
+        `File type "${ext}" is not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`,
+      );
+    }
     return this.documents.getPresignedUploadUrl(workspaceId, userId, fileName);
   }
 

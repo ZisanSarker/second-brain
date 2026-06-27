@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, WorkspaceId } from '../auth/decorators/current-user.decorator';
@@ -13,8 +13,13 @@ export class TrashController {
 
   @Get('trash')
   @ApiOperation({ summary: 'List trashed items' })
-  findAll(@CurrentUser('id') userId: string, @WorkspaceId() workspaceId: string) {
-    return this.trash.findAll(workspaceId, userId);
+  findAll(
+    @CurrentUser('id') userId: string,
+    @WorkspaceId() workspaceId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.trash.findAll(workspaceId, userId, page || 1, Math.min(limit || 50, 100));
   }
 
   @Post('trash/documents/:id/restore')

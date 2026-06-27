@@ -1,6 +1,17 @@
-import { IsString, IsOptional, IsEnum, IsUUID, IsInt, IsArray, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsInt,
+  IsArray,
+  Min,
+  Max,
+  IsIn,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '../constants/upload.constants';
 
 export class CreateDocumentDto {
   @ApiProperty()
@@ -19,6 +30,7 @@ export class CreateDocumentDto {
 
   @ApiProperty({ required: false })
   @IsString()
+  @IsIn(ALLOWED_MIME_TYPES)
   @IsOptional()
   mimeType?: string;
 

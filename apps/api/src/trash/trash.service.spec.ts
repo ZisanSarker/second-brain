@@ -10,9 +10,15 @@ describe('TrashService', () => {
   let storage: any;
 
   const mockPrisma = {
-    document: { findMany: jest.fn(), update: jest.fn(), delete: jest.fn(), deleteMany: jest.fn() },
+    document: {
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+      count: jest.fn(),
+    },
     documentVersion: { findMany: jest.fn() },
-    collection: { findMany: jest.fn(), deleteMany: jest.fn() },
+    collection: { findMany: jest.fn(), deleteMany: jest.fn(), count: jest.fn() },
     workspaceMember: { findUnique: jest.fn() },
   };
 
@@ -40,7 +46,7 @@ describe('TrashService', () => {
   });
 
   describe('findAll', () => {
-    it('should return trashed documents and collections', async () => {
+    it('should return trashed documents and collections with pagination', async () => {
       mockPrisma.workspaceMember.findUnique.mockResolvedValue(memberFixture);
       const trashedDoc = {
         id: 'doc-1',
@@ -52,11 +58,15 @@ describe('TrashService', () => {
       const trashedCol = { id: 'col-1', name: 'Trashed Collection', deletedAt: new Date() };
       mockPrisma.document.findMany.mockResolvedValue([trashedDoc]);
       mockPrisma.collection.findMany.mockResolvedValue([trashedCol]);
+      mockPrisma.document.count.mockResolvedValue(1);
+      mockPrisma.collection.count.mockResolvedValue(1);
 
-      const result = await service.findAll('ws-1', 'user-1');
+      const result = await service.findAll('ws-1', 'user-1', 1, 50);
 
       expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
         where: { workspaceId: 'ws-1', deletedAt: { not: null } },
+        skip: 0,
+        take: 50,
         include: {
           collection: { select: { id: true, name: true } },
           tags: { select: { id: true, name: true, color: true } },
@@ -69,6 +79,7 @@ describe('TrashService', () => {
       });
       expect(result.documents).toHaveLength(1);
       expect(result.collections).toHaveLength(1);
+      expect(result.meta).toEqual({ total: 1, page: 1, limit: 50, totalPages: 1 });
     });
   });
 
