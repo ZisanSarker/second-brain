@@ -34,6 +34,8 @@ class UpsertChunksRequest(BaseModel):
     version_id: str
     chunks: list[dict]
     embeddings: list[list[float]]
+    tags: Optional[list[str]] = None
+    language: Optional[str] = None
 
 
 class DeleteVectorsRequest(BaseModel):
@@ -103,6 +105,8 @@ class SearchRequest(BaseModel):
     top_k: int = Field(default=5, ge=1, le=100)
     document_id: Optional[str] = None
     collection_id: Optional[str] = None
+    tag_ids: Optional[list[str]] = None
+    language: Optional[str] = None
     score_threshold: Optional[float] = Field(default=None, ge=0.0, le=1.0)
 
 

@@ -37,7 +37,10 @@ export class DocumentProcessingProcessor extends WorkerHost {
     await this.upsertBackgroundJob(workspaceId, 'document.process', 'ACTIVE');
 
     try {
-      const doc = await this.prisma.document.findUniqueOrThrow({ where: { id: documentId } });
+      const doc = await this.prisma.document.findUniqueOrThrow({
+        where: { id: documentId },
+        include: { tags: { select: { name: true } } },
+      });
       const version = await this.prisma.documentVersion.findUniqueOrThrow({
         where: { id: versionId },
       });
@@ -93,7 +96,16 @@ export class DocumentProcessingProcessor extends WorkerHost {
       const { embeddings } = await this.ai.embedBatch(texts);
 
       // Step 6: Upsert to Qdrant
-      await this.ai.upsertChunks(workspaceId, documentId, versionId, chunks, embeddings);
+      const tagNames = doc.tags?.map((t: any) => t.name) ?? [];
+      await this.ai.upsertChunks(
+        workspaceId,
+        documentId,
+        versionId,
+        chunks,
+        embeddings,
+        tagNames,
+        doc.language ?? undefined,
+      );
 
       await this.prisma.document.update({
         where: { id: documentId },

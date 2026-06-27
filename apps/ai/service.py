@@ -136,28 +136,38 @@ def upsert_chunks(
     version_id: str,
     chunks: list[Chunk],
     embeddings: list[list[float]],
+    tags: Optional[list[str]] = None,
+    language: Optional[str] = None,
 ):
     if len(chunks) != len(embeddings):
         raise ValueError(f"chunk count ({len(chunks)}) != embedding count ({len(embeddings)})")
     client = get_qdrant_client()
+    base_payload = {
+        "workspace_id": workspace_id,
+        "document_id": document_id,
+        "version_id": version_id,
+        "source_type": "document",
+    }
+    if tags:
+        base_payload["tags"] = tags
+    if language:
+        base_payload["language"] = language
     points = []
     for chunk, vector in zip(chunks, embeddings):
         point_id = f"{document_id}_{chunk.index}"
+        payload = {
+            **base_payload,
+            "chunk_index": chunk.index,
+            "text": chunk.content,
+            "page_number": chunk.page_number,
+            "section": chunk.section,
+            "token_count": chunk.token_count,
+            "char_count": chunk.char_count,
+        }
         points.append(qdrant_models.PointStruct(
             id=point_id,
             vector=vector,
-            payload={
-                "workspace_id": workspace_id,
-                "document_id": document_id,
-                "version_id": version_id,
-                "chunk_index": chunk.index,
-                "text": chunk.content,
-                "page_number": chunk.page_number,
-                "section": chunk.section,
-                "token_count": chunk.token_count,
-                "char_count": chunk.char_count,
-                "source_type": "document",
-            },
+            payload=payload,
         ))
     client.upsert(
         collection_name=COLLECTION_NAME,
@@ -187,27 +197,38 @@ def search_chunks(
     top_k: int = 5,
     document_id: Optional[str] = None,
     collection_id: Optional[str] = None,
+    tag_ids: Optional[list[str]] = None,
+    language: Optional[str] = None,
     score_threshold: Optional[float] = None,
 ) -> list[SearchHit]:
     model = get_embedding_model()
     query_vec = model.encode(query, normalize_embeddings=True).tolist()
     client = get_qdrant_client()
-    qdrant_filter = qdrant_models.Filter(
-        must=[qdrant_models.FieldCondition(
-            key="workspace_id",
-            match=qdrant_models.MatchValue(value=workspace_id),
-        )],
-    )
+    must_conditions = [qdrant_models.FieldCondition(
+        key="workspace_id",
+        match=qdrant_models.MatchValue(value=workspace_id),
+    )]
     if document_id:
-        qdrant_filter.must.append(qdrant_models.FieldCondition(
+        must_conditions.append(qdrant_models.FieldCondition(
             key="document_id",
             match=qdrant_models.MatchValue(value=document_id),
         ))
     if collection_id:
-        qdrant_filter.must.append(qdrant_models.FieldCondition(
+        must_conditions.append(qdrant_models.FieldCondition(
             key="collection_id",
             match=qdrant_models.MatchValue(value=collection_id),
         ))
+    if tag_ids:
+        must_conditions.append(qdrant_models.FieldCondition(
+            key="tags",
+            match=qdrant_models.MatchAny(any=tag_ids),
+        ))
+    if language:
+        must_conditions.append(qdrant_models.FieldCondition(
+            key="language",
+            match=qdrant_models.MatchValue(value=language),
+        ))
+    qdrant_filter = qdrant_models.Filter(must=must_conditions)
     result = client.search(
         collection_name=COLLECTION_NAME,
         query_vector=query_vec,

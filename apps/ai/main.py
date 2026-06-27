@@ -228,7 +228,15 @@ async def upsert_chunks_endpoint(payload: UpsertChunksRequest):
     from schemas import Chunk
     chunk_objs = [Chunk(**c) for c in payload.chunks]
     try:
-        upsert_chunks(payload.workspace_id, payload.document_id, payload.version_id, chunk_objs, payload.embeddings)
+        upsert_chunks(
+            payload.workspace_id,
+            payload.document_id,
+            payload.version_id,
+            chunk_objs,
+            payload.embeddings,
+            tags=payload.tags,
+            language=payload.language,
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return {"status": "ok", "chunks_upserted": len(payload.chunks)}
@@ -254,6 +262,8 @@ async def search_endpoint(payload: SearchRequest):
             top_k=payload.top_k,
             document_id=payload.document_id,
             collection_id=payload.collection_id,
+            tag_ids=payload.tag_ids,
+            language=payload.language,
             score_threshold=payload.score_threshold,
         )
     except Exception as e:

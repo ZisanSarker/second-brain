@@ -155,24 +155,30 @@ export class AiService {
     versionId: string,
     chunks: ChunkResult['chunks'],
     embeddings: number[][],
+    tags?: string[],
+    language?: string,
   ): Promise<void> {
+    const body: Record<string, unknown> = {
+      workspace_id: workspaceId,
+      document_id: documentId,
+      version_id: versionId,
+      chunks: chunks.map((c) => ({
+        content: c.content,
+        index: c.index,
+        page_number: c.page_number ?? null,
+        section: c.section ?? null,
+        token_count: c.token_count,
+        char_count: c.char_count,
+      })),
+      embeddings,
+    };
+    if (tags && tags.length > 0) body.tags = tags;
+    if (language) body.language = language;
+
     const res = await fetch(`${this.baseUrl}/api/v1/upsert-chunks`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        workspace_id: workspaceId,
-        document_id: documentId,
-        version_id: versionId,
-        chunks: chunks.map((c) => ({
-          content: c.content,
-          index: c.index,
-          page_number: c.page_number ?? null,
-          section: c.section ?? null,
-          token_count: c.token_count,
-          char_count: c.char_count,
-        })),
-        embeddings,
-      }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const err = await res.text();
@@ -198,17 +204,25 @@ export class AiService {
     topK = 5,
     documentId?: string,
     collectionId?: string,
+    tagIds?: string[],
+    language?: string,
+    scoreThreshold?: number,
   ): Promise<SearchHit[]> {
+    const body: Record<string, unknown> = {
+      query,
+      workspace_id: workspaceId,
+      top_k: topK,
+    };
+    if (documentId) body.document_id = documentId;
+    if (collectionId) body.collection_id = collectionId;
+    if (tagIds && tagIds.length > 0) body.tag_ids = tagIds;
+    if (language) body.language = language;
+    if (scoreThreshold !== undefined) body.score_threshold = scoreThreshold;
+
     const res = await fetch(`${this.baseUrl}/api/v1/search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        workspace_id: workspaceId,
-        top_k: topK,
-        document_id: documentId,
-        collection_id: collectionId,
-      }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const err = await res.text();

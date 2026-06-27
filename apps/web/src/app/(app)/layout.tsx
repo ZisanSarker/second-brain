@@ -18,12 +18,15 @@ import {
   Clock,
   Heart,
   Trash2,
+  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { GlobalSearchBar } from '@/components/search/GlobalSearchBar';
 
 const sidebarLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/search', label: 'Search', icon: Search },
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/collections', label: 'Collections', icon: Library },
   { href: '/tags', label: 'Tags', icon: Tags },
@@ -173,7 +176,17 @@ function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto">
+        {/* Top header with global search */}
+        <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 border-b border-slate-800/50 bg-[#030303]/80 backdrop-blur-sm">
+          <div className="flex-1" />
+          <div className="flex-1 flex justify-center">
+            <GlobalSearchBar />
+          </div>
+          <div className="flex-1" />
+        </div>
+        {children}
+      </main>
     </div>
   );
 }
