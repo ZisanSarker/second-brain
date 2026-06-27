@@ -1,5 +1,5 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
@@ -9,7 +9,8 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  const logger = new Logger('Bootstrap');
 
   // Compression (before helmet per security best practice)
   app.use(compression());
@@ -52,8 +53,8 @@ async function bootstrap() {
 
   const port = process.env.PORT || process.env.PORT_API || 3001;
   await app.listen(port);
-  console.log(`NestJS Server running on http://localhost:${port}`);
-  console.log(`OpenAPI Docs available at http://localhost:${port}/api/docs`);
-  console.log(`GraphQL Playground available at http://localhost:${port}/graphql`);
+  logger.log(`NestJS Server running on http://localhost:${port}`);
+  logger.log(`OpenAPI Docs available at http://localhost:${port}/api/docs`);
+  logger.log(`GraphQL Playground available at http://localhost:${port}/graphql`);
 }
 bootstrap();

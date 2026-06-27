@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { LoggerModule } from 'nestjs-pino';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
@@ -49,6 +50,29 @@ import { AgentModule } from './agent/agent.module';
         limit: 100,
       },
     ]),
+
+    // Structured Logging
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { colorize: true } }
+            : undefined,
+        serializers: {
+          req: (req) => ({
+            method: req.method,
+            url: req.url,
+            headers: {
+              'user-agent': req.headers?.['user-agent'],
+              'x-request-id': req.headers?.['x-request-id'],
+            },
+          }),
+          res: (res) => ({ statusCode: res.statusCode }),
+        },
+        quietReqLogger: true,
+      },
+    }),
 
     // GraphQL (Code-First)
     GraphQLModule.forRoot<ApolloDriverConfig>({
