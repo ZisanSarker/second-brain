@@ -161,9 +161,9 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
         <ChatSidebar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <MessageSquare className="w-12 h-12 mx-auto mb-4 text-slate-700" />
-            <h2 className="text-lg font-medium text-slate-400 mb-2">Start a conversation</h2>
-            <p className="text-sm text-slate-500 max-w-md">
+            <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-lg font-medium text-muted-foreground mb-2">Start a conversation</h2>
+            <p className="text-sm text-muted-foreground max-w-md">
               Ask questions about your knowledge base. Your AI assistant will search documents and
               provide answers with citations.
             </p>
@@ -178,22 +178,22 @@ export function ChatLayout({ conversationId }: ChatLayoutProps) {
       <ChatSidebar />
       <div className="flex-1 flex flex-col h-full">
         {/* Header */}
-        <div className="px-6 py-3 border-b border-slate-800/50">
-          <h2 className="text-sm font-medium text-slate-200 truncate">{conv?.title || 'Chat'}</h2>
+        <div className="px-6 py-3 border-b border-border">
+          <h2 className="text-sm font-medium text-foreground truncate">{conv?.title || 'Chat'}</h2>
         </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
           {isLoading && (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-5 h-5 text-slate-500 animate-spin" />
+              <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
             </div>
           )}
 
           {!isLoading && allMessages.length === 0 && !isStreaming && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center py-12">
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Send a message to start chatting with your knowledge base.
                 </p>
               </div>

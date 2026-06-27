@@ -30,20 +30,18 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       }
 
       return (
-        <code className="bg-slate-800 px-1.5 py-0.5 rounded text-sm text-purple-300" {...props}>
+        <code className="bg-card px-1.5 py-0.5 rounded text-sm text-primary" {...props}>
           {children}
         </code>
       );
     },
     pre({ children }) {
-      return (
-        <div className="my-3 rounded-lg overflow-hidden border border-slate-700/50">{children}</div>
-      );
+      return <div className="my-3 rounded-lg overflow-hidden border border-border">{children}</div>;
     },
     table({ children }) {
       return (
         <div className="overflow-x-auto my-3">
-          <table className="min-w-full border-collapse border border-slate-700/50 text-sm">
+          <table className="min-w-full border-collapse border border-border text-sm">
             {children}
           </table>
         </div>
@@ -51,13 +49,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     },
     th({ children }) {
       return (
-        <th className="border border-slate-700/50 bg-slate-800/50 px-3 py-2 text-left font-medium text-slate-300">
+        <th className="border border-border bg-card/50 px-3 py-2 text-left font-medium text-foreground">
           {children}
         </th>
       );
     },
     td({ children }) {
-      return <td className="border border-slate-700/50 px-3 py-2 text-slate-400">{children}</td>;
+      return <td className="border border-border px-3 py-2 text-muted-foreground">{children}</td>;
     },
     a({ href, children }) {
       return (
@@ -65,21 +63,23 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-purple-400 hover:text-purple-300 underline"
+          className="text-primary hover:text-primary underline"
         >
           {children}
         </a>
       );
     },
     ul({ children }) {
-      return <ul className="list-disc list-inside space-y-1 my-2 text-slate-300">{children}</ul>;
+      return <ul className="list-disc list-inside space-y-1 my-2 text-foreground">{children}</ul>;
     },
     ol({ children }) {
-      return <ol className="list-decimal list-inside space-y-1 my-2 text-slate-300">{children}</ol>;
+      return (
+        <ol className="list-decimal list-inside space-y-1 my-2 text-foreground">{children}</ol>
+      );
     },
     blockquote({ children }) {
       return (
-        <blockquote className="border-l-2 border-purple-500/50 pl-4 my-2 text-slate-400 italic">
+        <blockquote className="border-l-2 border-primary/50 pl-4 my-2 text-muted-foreground italic">
           {children}
         </blockquote>
       );
@@ -87,7 +87,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   };
 
   return (
-    <div className="prose prose-invert max-w-none text-sm leading-relaxed">
+    <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>

@@ -81,11 +81,11 @@ export function GlobalSearchBar() {
       {/* Trigger button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/50 border border-slate-700/50 text-slate-400 hover:text-slate-200 hover:border-purple-500/30 transition-all text-sm w-full max-w-md"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-popover/50 border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all text-sm w-full max-w-md"
       >
         <Search className="w-4 h-4 shrink-0" />
         <span className="flex-1 text-left">Search...</span>
-        <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-500 font-mono border border-slate-700/50">
+        <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-card text-[10px] text-muted-foreground font-mono border border-border">
           ⌘K
         </kbd>
       </button>
@@ -94,7 +94,7 @@ export function GlobalSearchBar() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => {
               setOpen(false);
               setQuery('');
@@ -102,28 +102,29 @@ export function GlobalSearchBar() {
           />
           <div
             ref={panelRef}
-            className="relative z-10 w-full max-w-xl mx-4 glass-panel rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden"
+            className="relative z-10 w-full max-w-xl mx-4 glass-panel rounded-2xl border border-border shadow-2xl overflow-hidden"
           >
             {/* Input */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-700/50">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
               {isFetching ? (
-                <Loader2 className="w-5 h-5 text-slate-400 animate-spin shrink-0" />
+                <Loader2 className="w-5 h-5 text-muted-foreground animate-spin shrink-0" />
               ) : (
-                <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                <Search className="w-5 h-5 text-muted-foreground shrink-0" />
               )}
               <input
+                suppressHydrationWarning
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search documents, tags, collections..."
-                className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none text-base"
+                className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-base"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="text-slate-500 hover:text-slate-300"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -141,18 +142,18 @@ export function GlobalSearchBar() {
                       onClick={() => navigate(s.text)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
                         i === selectedIndex
-                          ? 'bg-purple-500/10 text-purple-300'
-                          : 'text-slate-300 hover:bg-slate-800/30'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-foreground hover:bg-muted/30'
                       }`}
                     >
-                      <Icon className="w-4 h-4 shrink-0 text-slate-500" />
+                      <Icon className="w-4 h-4 shrink-0 text-muted-foreground" />
                       <div className="flex-1 text-left truncate">
                         <span>{s.text}</span>
                         {s.subtitle && (
-                          <span className="ml-2 text-xs text-slate-500">{s.subtitle}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">{s.subtitle}</span>
                         )}
                       </div>
-                      <span className="text-[10px] uppercase text-slate-600">{s.type}</span>
+                      <span className="text-[10px] uppercase text-muted-foreground">{s.type}</span>
                     </button>
                   );
                 })}
@@ -161,13 +162,13 @@ export function GlobalSearchBar() {
 
             {/* Empty state */}
             {query && !isFetching && suggestions.length === 0 && (
-              <div className="px-4 py-8 text-center text-sm text-slate-500">
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                 No results for &ldquo;{query}&rdquo;
               </div>
             )}
 
             {/* Footer */}
-            <div className="flex items-center gap-4 px-4 py-2 border-t border-slate-700/50 text-[10px] text-slate-600">
+            <div className="flex items-center gap-4 px-4 py-2 border-t border-border text-[10px] text-muted-foreground">
               <span>↑↓ Navigate</span>
               <span>↵ Open</span>
               <span>Esc Close</span>

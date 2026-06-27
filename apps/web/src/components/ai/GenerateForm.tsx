@@ -32,24 +32,25 @@ export function GenerateForm({
   const { data: collections } = useCollections();
 
   return (
-    <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+    <div className="space-y-4 rounded-xl border border-border bg-popover/50 p-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Document ID</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Document ID</label>
           <input
+            suppressHydrationWarning
             type="text"
             value={selectedDocId}
             onChange={(e) => setSelectedDocId(e.target.value)}
             placeholder="Paste a document ID..."
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Collection</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Collection</label>
           <select
             value={selectedCollectionId}
             onChange={(e) => setSelectedCollectionId(e.target.value)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 focus:border-purple-500 focus:outline-none"
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           >
             <option value="">Select a collection...</option>
             {collections?.map((c: any) => (
@@ -63,7 +64,7 @@ export function GenerateForm({
 
       {showCustomPrompt && (
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+          <label className="mb-1.5 block text-sm font-medium text-foreground">
             Custom Prompt (optional)
           </label>
           <textarea
@@ -71,20 +72,21 @@ export function GenerateForm({
             onChange={(e) => setCustomPrompt(e.target.value)}
             placeholder="Override the default prompt..."
             rows={2}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
           />
         </div>
       )}
 
       {showLanguage && (
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Language</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Language</label>
           <input
+            suppressHydrationWarning
             type="text"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
             placeholder="e.g., Spanish, French, Japanese..."
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
           />
         </div>
       )}
@@ -99,7 +101,7 @@ export function GenerateForm({
           })
         }
         disabled={isLoading || (!selectedDocId && !selectedCollectionId)}
-        className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
       >
         {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
         {isLoading ? 'Generating...' : 'Generate'}

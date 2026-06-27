@@ -24,7 +24,7 @@ export function AiNav({ className }: { className?: string }) {
         <Link
           key={link.href}
           href={link.href}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           {link.label}
         </Link>
@@ -45,8 +45,8 @@ export function AiPageLayout({
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">{title}</h1>
-        {description && <p className="mt-1 text-sm text-zinc-400">{description}</p>}
+        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
       <AiNav />
       <div className="min-h-[300px]">{children}</div>

@@ -32,13 +32,13 @@ export function ChatMessage({
     <div className={`flex gap-3 ${role === 'user' ? 'flex-row-reverse' : ''}`}>
       <div
         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          role === 'user' ? 'bg-purple-500/20' : 'bg-slate-800'
+          role === 'user' ? 'bg-primary/20' : 'bg-card'
         }`}
       >
         {role === 'user' ? (
-          <User className="w-4 h-4 text-purple-400" />
+          <User className="w-4 h-4 text-primary" />
         ) : (
-          <Bot className="w-4 h-4 text-slate-400" />
+          <Bot className="w-4 h-4 text-muted-foreground" />
         )}
       </div>
 
@@ -46,8 +46,8 @@ export function ChatMessage({
         <div
           className={`rounded-2xl px-4 py-3 ${
             role === 'user'
-              ? 'bg-purple-500/10 border border-purple-500/20 text-slate-200'
-              : 'bg-slate-900/50 border border-slate-800/50 text-slate-200'
+              ? 'bg-primary/10 border border-primary/20 text-foreground'
+              : 'bg-popover/50 border border-border text-foreground'
           }`}
         >
           {content ? (
@@ -55,15 +55,15 @@ export function ChatMessage({
           ) : isStreaming ? (
             <div className="flex items-center gap-1">
               <span
-                className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-primary rounded-full animate-bounce"
                 style={{ animationDelay: '0ms' }}
               />
               <span
-                className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-primary rounded-full animate-bounce"
                 style={{ animationDelay: '150ms' }}
               />
               <span
-                className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-primary rounded-full animate-bounce"
                 style={{ animationDelay: '300ms' }}
               />
             </div>
@@ -76,9 +76,9 @@ export function ChatMessage({
             {citations.map((c, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700/50 text-[10px] text-slate-400"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-card border border-border text-[10px] text-muted-foreground"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 {c.documentTitle ? c.documentTitle.slice(0, 30) : `Doc ${c.documentId.slice(0, 8)}`}
                 {c.pageNumber ? ` p.${c.pageNumber}` : ''}
               </span>
@@ -91,7 +91,7 @@ export function ChatMessage({
           <div className="flex items-center gap-1 mt-1.5 px-1">
             <button
               onClick={handleCopy}
-              className="p-1 rounded-md text-slate-600 hover:text-slate-400 hover:bg-slate-800/50 transition-colors"
+              className="p-1 rounded-md text-muted-foreground hover:text-muted-foreground hover:bg-muted/50 transition-colors"
               title="Copy"
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -99,7 +99,7 @@ export function ChatMessage({
             {onRegenerate && (
               <button
                 onClick={onRegenerate}
-                className="p-1 rounded-md text-slate-600 hover:text-slate-400 hover:bg-slate-800/50 transition-colors"
+                className="p-1 rounded-md text-muted-foreground hover:text-muted-foreground hover:bg-muted/50 transition-colors"
                 title="Regenerate"
               >
                 <RefreshCw className="w-3.5 h-3.5" />

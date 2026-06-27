@@ -15,9 +15,9 @@ export default function InsightsPage() {
   return (
     <AiPageLayout title="Insights" description="Cross-document analysis and workspace intelligence">
       <div className="space-y-8">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-          <h3 className="mb-3 font-semibold text-zinc-100">Cross-Document Insights</h3>
-          <p className="mb-3 text-sm text-zinc-500">
+        <div className="rounded-xl border border-border bg-popover/50 p-5">
+          <h3 className="mb-3 font-semibold text-foreground">Cross-Document Insights</h3>
+          <p className="mb-3 text-sm text-muted-foreground">
             Analyze multiple documents together to find themes, contradictions, and synthesis.
           </p>
           <textarea
@@ -25,7 +25,7 @@ export default function InsightsPage() {
             onChange={(e) => setDocumentIds(e.target.value)}
             placeholder="Enter document IDs, one per line..."
             rows={4}
-            className="mb-3 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+            className="mb-3 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
           />
           <button
             onClick={() => {
@@ -38,7 +38,7 @@ export default function InsightsPage() {
               }
             }}
             disabled={crossDoc.isPending || documentIds.split('\n').filter(Boolean).length < 2}
-            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary-hover disabled:opacity-50"
           >
             {crossDoc.isPending ? (
               <Loader2 size={16} className="animate-spin" />
@@ -49,15 +49,15 @@ export default function InsightsPage() {
           </button>
         </div>
 
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-          <h3 className="mb-3 font-semibold text-zinc-100">Workspace Trends</h3>
-          <p className="mb-3 text-sm text-zinc-500">
+        <div className="rounded-xl border border-border bg-popover/50 p-5">
+          <h3 className="mb-3 font-semibold text-foreground">Workspace Trends</h3>
+          <p className="mb-3 text-sm text-muted-foreground">
             Analyze your recent documents to identify patterns, topics, and knowledge gaps.
           </p>
           <button
             onClick={() => trends.mutate(undefined, { onSuccess: (res: any) => setResult(res) })}
             disabled={trends.isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary-hover disabled:opacity-50"
           >
             {trends.isPending ? (
               <Loader2 size={16} className="animate-spin" />

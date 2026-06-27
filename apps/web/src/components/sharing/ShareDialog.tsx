@@ -65,40 +65,41 @@ export function ShareDialog({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs text-foreground hover:bg-muted"
       >
         <Share2 size={14} /> Share
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
+          <div className="w-full max-w-md rounded-xl border border-border bg-popover p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-zinc-100">Share</h3>
+              <h3 className="font-semibold text-foreground">Share</h3>
               <button
                 onClick={() => {
                   setOpen(false);
                   onClose?.();
                 }}
-                className="text-zinc-500 hover:text-zinc-300"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="mb-4">
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">Add people</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Add people</label>
               <div className="flex gap-2">
                 <input
+                  suppressHydrationWarning
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="User ID or email..."
-                  className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                  className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
                 />
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-zinc-300"
+                  className="rounded-lg border border-border bg-card px-2 py-2 text-sm text-foreground"
                 >
                   {roles.map((r) => (
                     <option key={r} value={r}>
@@ -109,7 +110,7 @@ export function ShareDialog({
                 <button
                   onClick={handleShare}
                   disabled={createPerm.isPending || !email.trim()}
-                  className="rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-foreground hover:bg-primary-hover disabled:opacity-50"
                 >
                   {createPerm.isPending ? <Loader2 size={14} className="animate-spin" /> : 'Share'}
                 </button>
@@ -118,22 +119,22 @@ export function ShareDialog({
 
             {permissions?.length > 0 && (
               <div className="mb-4">
-                <h4 className="mb-2 text-xs font-medium text-zinc-400">Shared with</h4>
+                <h4 className="mb-2 text-xs font-medium text-muted-foreground">Shared with</h4>
                 <div className="space-y-2">
                   {permissions.map((p: any) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between rounded-lg bg-zinc-800/50 px-3 py-2"
+                      className="flex items-center justify-between rounded-lg bg-card/50 px-3 py-2"
                     >
                       <div>
-                        <p className="text-sm text-zinc-200">
+                        <p className="text-sm text-foreground">
                           {p.user?.name || p.user?.email || p.userId}
                         </p>
-                        <p className="text-xs text-zinc-500">{p.role}</p>
+                        <p className="text-xs text-muted-foreground">{p.role}</p>
                       </div>
                       <button
                         onClick={() => deletePerm.mutate(p.id, { onSuccess: () => refetchPerms() })}
-                        className="rounded p-1 text-zinc-500 hover:text-red-400"
+                        className="rounded p-1 text-muted-foreground hover:text-destructive-foreground"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -143,12 +144,12 @@ export function ShareDialog({
               </div>
             )}
 
-            <div className="border-t border-zinc-800 pt-4">
+            <div className="border-t border-border pt-4">
               <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-xs font-medium text-zinc-400">Shareable links</h4>
+                <h4 className="text-xs font-medium text-muted-foreground">Shareable links</h4>
                 <button
                   onClick={handleCreateLink}
-                  className="text-xs text-purple-400 hover:text-purple-300"
+                  className="text-xs text-primary hover:text-primary"
                 >
                   + Create link
                 </button>
@@ -156,12 +157,12 @@ export function ShareDialog({
               {links?.map((l: any) => (
                 <div
                   key={l.id}
-                  className="mb-2 flex items-center justify-between rounded-lg bg-zinc-800/30 px-3 py-2"
+                  className="mb-2 flex items-center justify-between rounded-lg bg-card/30 px-3 py-2"
                 >
                   <div>
-                    <p className="text-xs text-zinc-400">{l.permission}</p>
+                    <p className="text-xs text-muted-foreground">{l.permission}</p>
                     {l.expiresAt && (
-                      <p className="text-[10px] text-zinc-600">
+                      <p className="text-[10px] text-muted-foreground">
                         Expires {new Date(l.expiresAt).toLocaleDateString()}
                       </p>
                     )}
@@ -169,17 +170,17 @@ export function ShareDialog({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => copyToClipboard(l.token)}
-                      className="rounded p-1 text-zinc-500 hover:text-zinc-300"
+                      className="rounded p-1 text-muted-foreground hover:text-foreground"
                     >
                       {copied === l.token ? (
-                        <Check size={14} className="text-emerald-400" />
+                        <Check size={14} className="text-success" />
                       ) : (
                         <Copy size={14} />
                       )}
                     </button>
                     <button
                       onClick={() => deleteLink.mutate(l.id, { onSuccess: () => refetchLinks() })}
-                      className="rounded p-1 text-zinc-500 hover:text-red-400"
+                      className="rounded p-1 text-muted-foreground hover:text-destructive-foreground"
                     >
                       <Trash2 size={14} />
                     </button>

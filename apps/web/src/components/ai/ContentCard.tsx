@@ -30,41 +30,41 @@ export function ContentCard({ item, onDeleted }: { item: any; onDeleted?: () => 
   };
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
+    <div className="rounded-lg border border-border bg-popover/30 p-4">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="rounded bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-300">
+          <span className="rounded bg-card px-2 py-0.5 text-xs font-medium text-foreground">
             {item.type}
           </span>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-muted-foreground">
             {new Date(item.createdAt).toLocaleDateString()}
           </span>
-          {item.model && <span className="text-xs text-zinc-600">{item.model}</span>}
+          {item.model && <span className="text-xs text-muted-foreground">{item.model}</span>}
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowComments(true)}
-            className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             title="Comments"
           >
             <MessageSquare size={14} />
           </button>
           <button
             onClick={() => setShowShare(true)}
-            className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             title="Share"
           >
             <Share2 size={14} />
           </button>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
           <button
             onClick={handleDelete}
-            className="rounded p-1 text-zinc-500 hover:bg-red-900/30 hover:text-red-400"
+            className="rounded p-1 text-muted-foreground hover:bg-destructive/30 hover:text-destructive-foreground"
           >
             <Trash2 size={14} />
           </button>
@@ -72,11 +72,13 @@ export function ContentCard({ item, onDeleted }: { item: any; onDeleted?: () => 
       </div>
 
       {expanded && (
-        <div className="mt-2 max-h-96 overflow-auto rounded bg-zinc-950 p-3">
+        <div className="mt-2 max-h-96 overflow-auto rounded bg-popover p-3">
           {isJson ? (
-            <pre className="text-xs text-zinc-300">{formatted}</pre>
+            <pre className="text-xs text-foreground">{formatted}</pre>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none text-zinc-300">{formatted}</div>
+            <div className="prose prose-invert prose-sm max-w-none text-foreground">
+              {formatted}
+            </div>
           )}
         </div>
       )}
@@ -101,7 +103,9 @@ export function ContentCard({ item, onDeleted }: { item: any; onDeleted?: () => 
 
 export function ContentList({ items, onDeleted }: { items: any[]; onDeleted?: () => void }) {
   if (!items?.length) {
-    return <p className="py-8 text-center text-sm text-zinc-500">No content generated yet.</p>;
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">No content generated yet.</p>
+    );
   }
 
   return (

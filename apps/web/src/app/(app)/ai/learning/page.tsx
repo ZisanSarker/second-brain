@@ -56,8 +56,8 @@ export default function LearningPage() {
             onClick={() => setActiveTool(tool.key)}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
               activeTool === tool.key
-                ? 'bg-purple-600 text-white'
-                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+                ? 'bg-primary text-foreground'
+                : 'bg-card text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
             {tool.label}
@@ -65,7 +65,7 @@ export default function LearningPage() {
         ))}
       </div>
 
-      <p className="mb-4 text-sm text-zinc-500">
+      <p className="mb-4 text-sm text-muted-foreground">
         {tools.find((t) => t.key === activeTool)?.description}
       </p>
 

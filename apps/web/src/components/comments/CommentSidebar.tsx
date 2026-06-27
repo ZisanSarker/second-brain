@@ -125,24 +125,24 @@ export function CommentSidebar({
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs text-foreground hover:bg-muted"
       >
         <MessageSquare size={14} />
         Comments {comments?.length ? `(${comments.length})` : ''}
       </button>
 
       {open && (
-        <div className="fixed inset-y-0 right-0 z-40 w-96 border-l border-zinc-800 bg-zinc-900 shadow-2xl">
+        <div className="fixed inset-y-0 right-0 z-40 w-96 border-l border-border bg-popover shadow-2xl">
           <div className="flex h-full flex-col">
-            <div className="border-b border-zinc-800 px-4 py-3">
+            <div className="border-b border-border px-4 py-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-zinc-100">Comments</h3>
+                <h3 className="font-semibold text-foreground">Comments</h3>
                 <button
                   onClick={() => {
                     setOpen(false);
                     onClose?.();
                   }}
-                  className="text-sm text-zinc-500 hover:text-zinc-300"
+                  className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   Close
                 </button>
@@ -151,22 +151,19 @@ export function CommentSidebar({
 
             <div className="flex-1 overflow-y-auto p-4">
               {comments?.length === 0 && (
-                <p className="py-8 text-center text-sm text-zinc-500">No comments yet</p>
+                <p className="py-8 text-center text-sm text-muted-foreground">No comments yet</p>
               )}
               {comments?.map((c: any) => (
-                <div
-                  key={c.id}
-                  className="mb-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"
-                >
+                <div key={c.id} className="mb-4 rounded-lg border border-border bg-popover/50 p-3">
                   <div className="mb-1 flex items-center justify-between">
-                    <span className="text-sm font-medium text-zinc-200">
+                    <span className="text-sm font-medium text-foreground">
                       {c.user?.name || 'Unknown'}
                     </span>
                     <div className="flex items-center gap-1">
                       {!c.resolvedAt && (
                         <button
                           onClick={() => resolve.mutate(c.id, { onSuccess: () => refetch() })}
-                          className="rounded p-1 text-zinc-500 hover:text-emerald-400"
+                          className="rounded p-1 text-muted-foreground hover:text-success"
                           title="Resolve"
                         >
                           <Check size={12} />
@@ -174,44 +171,46 @@ export function CommentSidebar({
                       )}
                       <button
                         onClick={() => del.mutate(c.id, { onSuccess: () => refetch() })}
-                        className="rounded p-1 text-zinc-500 hover:text-red-400"
+                        className="rounded p-1 text-muted-foreground hover:text-destructive-foreground"
                         title="Delete"
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-zinc-300">{c.content}</p>
-                  {c.editedAt && <span className="text-[10px] text-zinc-600">(edited)</span>}
-                  {c.resolvedAt && (
-                    <span className="ml-2 text-[10px] text-emerald-500">Resolved</span>
+                  <p className="text-sm text-foreground">{c.content}</p>
+                  {c.editedAt && (
+                    <span className="text-[10px] text-muted-foreground">(edited)</span>
                   )}
+                  {c.resolvedAt && <span className="ml-2 text-[10px] text-success">Resolved</span>}
                   <button
                     onClick={() => setReplyTo(c.id)}
-                    className="mt-1 text-xs text-zinc-500 hover:text-zinc-300"
+                    className="mt-1 text-xs text-muted-foreground hover:text-foreground"
                   >
                     Reply
                   </button>
 
                   {c.replies?.map((r: any) => (
-                    <div key={r.id} className="ml-4 mt-2 border-l-2 border-zinc-700 pl-3">
+                    <div key={r.id} className="ml-4 mt-2 border-l-2 border-border pl-3">
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-medium text-zinc-400">{r.user?.name}</span>
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {r.user?.name}
+                        </span>
                       </div>
-                      <p className="text-sm text-zinc-400">{r.content}</p>
+                      <p className="text-sm text-muted-foreground">{r.content}</p>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-zinc-800 p-4">
+            <div className="border-t border-border p-4">
               {replyTo && (
-                <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
+                <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
                   <span>Replying to comment</span>
                   <button
                     onClick={() => setReplyTo(null)}
-                    className="text-zinc-600 hover:text-zinc-400"
+                    className="text-muted-foreground hover:text-muted-foreground"
                   >
                     Cancel
                   </button>
@@ -227,10 +226,10 @@ export function CommentSidebar({
                     onFocus={loadMembers}
                     placeholder="Add a comment... (use @name to mention)"
                     rows={2}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
                   />
                   {mentionSearch && filteredMembers.length > 0 && (
-                    <div className="absolute bottom-full left-0 right-0 mb-1 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800 shadow-xl">
+                    <div className="absolute bottom-full left-0 right-0 mb-1 overflow-hidden rounded-lg border border-border bg-card shadow-xl">
                       {filteredMembers.map((m, i) => (
                         <button
                           key={m.id}
@@ -238,11 +237,11 @@ export function CommentSidebar({
                           onMouseEnter={() => setMentionIndex(i)}
                           className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm ${
                             i === mentionIndex
-                              ? 'bg-purple-600 text-white'
-                              : 'text-zinc-300 hover:bg-zinc-700'
+                              ? 'bg-primary text-foreground'
+                              : 'text-foreground hover:bg-muted'
                           }`}
                         >
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-600 text-xs font-medium text-zinc-200">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-foreground">
                             {(m.user?.name || 'U')[0].toUpperCase()}
                           </div>
                           <span>{m.user?.name || m.email}</span>
@@ -254,7 +253,7 @@ export function CommentSidebar({
                 <button
                   onClick={handleSubmit}
                   disabled={create.isPending || !content.trim()}
-                  className="self-end rounded-lg bg-purple-600 p-2 text-white hover:bg-purple-500 disabled:opacity-50"
+                  className="self-end rounded-lg bg-primary p-2 text-foreground hover:bg-primary-hover disabled:opacity-50"
                 >
                   {create.isPending ? (
                     <Loader2 size={14} className="animate-spin" />

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/auth-store';
-import { Brain } from 'lucide-react';
+import Image from 'next/image';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -19,10 +19,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen grid-bg flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 inline-flex animate-pulse">
-            <Brain className="w-8 h-8 text-purple-400" />
+          <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 inline-flex animate-pulse">
+            <Image
+              src="/secondbrain_logo.png"
+              alt="Second Brain"
+              width={48}
+              height={48}
+              className="rounded-lg"
+            />
           </div>
-          <p className="text-slate-400">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
