@@ -90,6 +90,7 @@ model User {
   uploadedFiles    File[]
   searchHistory    SearchHistory[]
   comments         Comment[]
+  refreshTokens    RefreshToken[]
 
   @@index([email])
 }
@@ -470,4 +471,19 @@ model SharedLink {
 
   @@index([token])
   @@index([documentId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  family    String    // group tokens into families for rotation tracking
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([family])
 }
