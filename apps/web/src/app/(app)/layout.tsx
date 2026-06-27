@@ -7,7 +7,7 @@ import {
   Brain,
   LayoutDashboard,
   Library,
-  MessagesSquare,
+  MessageSquare,
   Settings,
   Users,
   LogOut,
@@ -26,6 +26,7 @@ import { GlobalSearchBar } from '@/components/search/GlobalSearchBar';
 
 const sidebarLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/search', label: 'Search', icon: Search },
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/collections', label: 'Collections', icon: Library },
