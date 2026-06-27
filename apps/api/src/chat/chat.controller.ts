@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Inject,
   Res,
   Req,
 } from '@nestjs/common';
@@ -24,7 +25,7 @@ import { ContextBuilderService } from './services/context-builder.service';
 import { PromptBuilderService } from './services/prompt-builder.service';
 import { QueryOptimizerService } from './services/query-optimizer.service';
 import { StreamingService } from './services/streaming.service';
-import { OpenRouterProvider } from './providers/openrouter.provider';
+import { LlmProvider } from './providers/llm-provider.interface';
 import { SendMessageDto, RegenerateDto } from './dto/chat-request.dto';
 import { CreateConversationDto, UpdateConversationDto } from './dto/conversation.dto';
 
@@ -41,7 +42,7 @@ export class ChatController {
     private promptBuilder: PromptBuilderService,
     private queryOptimizer: QueryOptimizerService,
     private streamingService: StreamingService,
-    private llm: OpenRouterProvider,
+    @Inject('LLM_PROVIDER') private llm: LlmProvider,
   ) {}
 
   // ── Send Message (SSE Stream) ────────────────────────────────────────

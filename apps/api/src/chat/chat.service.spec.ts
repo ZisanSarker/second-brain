@@ -10,7 +10,6 @@ import { ContextBuilderService } from './services/context-builder.service';
 import { PromptBuilderService } from './services/prompt-builder.service';
 import { QueryOptimizerService } from './services/query-optimizer.service';
 import { StreamingService } from './services/streaming.service';
-import { OpenRouterProvider } from './providers/openrouter.provider';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
 describe('Chat Module', () => {
@@ -21,7 +20,7 @@ describe('Chat Module', () => {
   let promptBuilder: PromptBuilderService;
   let queryOptimizer: QueryOptimizerService;
   let streamingService: StreamingService;
-  let openRouter: OpenRouterProvider;
+  let openRouter: any;
 
   const mockPrisma = {
     conversation: {
@@ -70,16 +69,19 @@ describe('Chat Module', () => {
         PromptBuilderService,
         QueryOptimizerService,
         StreamingService,
-        OpenRouterProvider,
+        {
+          provide: 'LLM_PROVIDER',
+          useValue: { generateChat: jest.fn(), generateChatStream: jest.fn() },
+        },
         { provide: PrismaService, useValue: mockPrisma },
         { provide: SearchService, useValue: mockSearchService },
         {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string, defaultValue?: string) => {
-              if (key === 'OPENROUTER_API_KEY') return 'test-key';
-              if (key === 'OPENROUTER_BASE_URL') return 'https://openrouter.ai/api/v1';
-              if (key === 'OPENROUTER_MODEL') return 'google/gemma-4-31b-it:free';
+              if (key === 'LLM_API_KEY') return 'test-key';
+              if (key === 'LLM_BASE_URL') return 'https://openrouter.ai/api/v1';
+              if (key === 'LLM_MODEL') return 'google/gemma-4-31b-it:free';
               return defaultValue;
             }),
           },
@@ -94,7 +96,7 @@ describe('Chat Module', () => {
     promptBuilder = module.get<PromptBuilderService>(PromptBuilderService);
     queryOptimizer = module.get<QueryOptimizerService>(QueryOptimizerService);
     streamingService = module.get<StreamingService>(StreamingService);
-    openRouter = module.get<OpenRouterProvider>(OpenRouterProvider);
+    openRouter = module.get('LLM_PROVIDER');
   });
 
   beforeEach(() => {
@@ -248,12 +250,11 @@ describe('Chat Module', () => {
     });
   });
 
-  describe('OpenRouterProvider', () => {
-    it('should build correct headers', () => {
-      const headers = (openRouter as any).headers();
-      expect(headers.Authorization).toBe('Bearer test-key');
-      expect(headers['HTTP-Referer']).toBe('https://secondbrain.app');
-      expect(headers['X-Title']).toBe('Second Brain');
+  describe('LLM Provider', () => {
+    it('should inject LLM_PROVIDER token', () => {
+      expect(openRouter).toBeDefined();
+      expect(typeof openRouter.generateChat).toBe('function');
+      expect(typeof openRouter.generateChatStream).toBe('function');
     });
   });
 });

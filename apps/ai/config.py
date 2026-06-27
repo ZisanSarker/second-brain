@@ -8,10 +8,10 @@ class Settings:
     port: int = int(os.getenv("PORT", "8000"))
     host: str = os.getenv("HOST", "0.0.0.0")
 
-    # OpenRouter
-    openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
-    openrouter_base_url: str = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-    openrouter_model: str = os.getenv("OPENROUTER_MODEL", "google/gemma-4-31b-it:free")
+    # LLM Provider
+    llm_api_key: str = os.getenv("LLM_API_KEY", "")
+    llm_base_url: str = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
+    llm_model: str = os.getenv("LLM_MODEL", "google/gemma-4-31b-it:free")
 
     # Qdrant
     qdrant_host: str = os.getenv("QDRANT_HOST", "localhost")

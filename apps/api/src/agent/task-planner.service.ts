@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { OpenRouterProvider } from '../chat/providers/openrouter.provider';
+import { Injectable, Inject } from '@nestjs/common';
+import { LlmProvider } from '../chat/providers/llm-provider.interface';
 import { ToolRegistry } from './tools/tool-registry';
 
 @Injectable()
 export class TaskPlannerService {
   constructor(
-    private llmProvider: OpenRouterProvider,
+    @Inject('LLM_PROVIDER') private llmProvider: LlmProvider,
     private toolRegistry: ToolRegistry,
   ) {}
 

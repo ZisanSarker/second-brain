@@ -8,7 +8,7 @@ import {
   ChatMessage,
 } from './llm-provider.interface';
 
-interface OpenRouterChunk {
+interface LlmChunk {
   choices?: Array<{
     delta?: { content?: string };
     finish_reason?: string | null;
@@ -21,19 +21,16 @@ interface OpenRouterChunk {
 }
 
 @Injectable()
-export class OpenRouterProvider implements LlmProvider {
-  private readonly logger = new Logger(OpenRouterProvider.name);
+export class OpenAiCompatProvider implements LlmProvider {
+  private readonly logger = new Logger(OpenAiCompatProvider.name);
   private readonly baseUrl: string;
   private readonly apiKey: string;
   private readonly defaultModel: string;
 
   constructor(private config: ConfigService) {
-    this.baseUrl = this.config.get<string>('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1');
-    this.apiKey = this.config.get<string>('OPENROUTER_API_KEY', '');
-    this.defaultModel = this.config.get<string>(
-      'OPENROUTER_MODEL',
-      'google/gemma-4-26b-a4b-it:free',
-    );
+    this.baseUrl = this.config.get<string>('LLM_BASE_URL', 'https://openrouter.ai/api/v1');
+    this.apiKey = this.config.get<string>('LLM_API_KEY', '');
+    this.defaultModel = this.config.get<string>('LLM_MODEL', 'google/gemma-4-31b-it:free');
   }
 
   generateChatStream(options: ChatStreamOptions): Observable<string> {
@@ -81,7 +78,7 @@ export class OpenRouterProvider implements LlmProvider {
 
     if (!res.ok) {
       const err = await res.text();
-      throw new Error(`OpenRouter request failed (${res.status}): ${err}`);
+      throw new Error(`LLM request failed (${res.status}): ${err}`);
     }
 
     const data = await res.json();
@@ -115,7 +112,7 @@ export class OpenRouterProvider implements LlmProvider {
 
     if (!res.ok) {
       const err = await res.text();
-      subscriber.error(new Error(`OpenRouter stream failed (${res.status}): ${err}`));
+      subscriber.error(new Error(`LLM stream failed (${res.status}): ${err}`));
       return;
     }
 
@@ -148,7 +145,7 @@ export class OpenRouterProvider implements LlmProvider {
           }
 
           try {
-            const chunk: OpenRouterChunk = JSON.parse(jsonStr);
+            const chunk: LlmChunk = JSON.parse(jsonStr);
             if (chunk.error) {
               subscriber.error(new Error(chunk.error.message));
               return;
@@ -183,8 +180,6 @@ export class OpenRouterProvider implements LlmProvider {
     return {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${this.apiKey}`,
-      'HTTP-Referer': 'https://secondbrain.app',
-      'X-Title': 'Second Brain',
     };
   }
 }

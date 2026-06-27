@@ -72,8 +72,9 @@ services:
       PORT: '8000'
       QDRANT_HOST: qdrant
       QDRANT_PORT: '6333'
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-google/gemma-4-31b-it:free}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-google/gemma-4-31b-it:free}
       CORS_ORIGINS: http://localhost:3000,http://localhost:3001
     depends_on:
       qdrant:

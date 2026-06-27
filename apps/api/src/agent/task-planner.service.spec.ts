@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OpenRouterProvider } from '../chat/providers/openrouter.provider';
 import { ToolRegistry } from './tools/tool-registry';
 import { TaskPlannerService } from './task-planner.service';
 
@@ -24,13 +23,13 @@ describe('TaskPlannerService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TaskPlannerService,
-        { provide: OpenRouterProvider, useValue: mockLlmProvider },
+        { provide: 'LLM_PROVIDER', useValue: mockLlmProvider },
         { provide: ToolRegistry, useValue: mockToolRegistry },
       ],
     }).compile();
 
     service = module.get<TaskPlannerService>(TaskPlannerService);
-    llmProvider = module.get(OpenRouterProvider);
+    llmProvider = module.get('LLM_PROVIDER');
     toolRegistry = module.get(ToolRegistry);
     jest.clearAllMocks();
   });

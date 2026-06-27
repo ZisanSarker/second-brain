@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from '../../shared/services/prisma.service';
 import { ToolRegistry } from '../tools/tool-registry';
-import { OpenRouterProvider } from '../../chat/providers/openrouter.provider';
+import { LlmProvider } from '../../chat/providers/llm-provider.interface';
 import { ExecutionService } from '../execution.service';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class WorkflowExecutorService {
   constructor(
     private prisma: PrismaService,
     private toolRegistry: ToolRegistry,
-    private llmProvider: OpenRouterProvider,
+    @Inject('LLM_PROVIDER') private llmProvider: LlmProvider,
     private executionService: ExecutionService,
   ) {}
 

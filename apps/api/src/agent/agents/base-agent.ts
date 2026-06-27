@@ -1,4 +1,4 @@
-import { OpenRouterProvider } from '../../chat/providers/openrouter.provider';
+import { LlmProvider } from '../../chat/providers/llm-provider.interface';
 import { ToolRegistry } from '../tools/tool-registry';
 import { ExecutionService } from '../execution.service';
 import { MemoryService } from '../memory.service';
@@ -18,7 +18,7 @@ export abstract class BaseAgent {
   abstract readonly defaultTools: string[];
 
   constructor(
-    protected readonly llmProvider: OpenRouterProvider,
+    protected readonly llmProvider: LlmProvider,
     protected readonly toolRegistry: ToolRegistry,
     protected readonly executionService: ExecutionService,
     protected readonly memoryService: MemoryService,

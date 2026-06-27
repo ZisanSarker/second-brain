@@ -253,28 +253,25 @@ def search_chunks(
     return hits
 
 
-# --- AI Generation (OpenRouter) ---
+# --- AI Generation (LLM) ---
 
 import httpx
 
-OPENROUTER_HEADERS = {
-    "HTTP-Referer": "https://secondbrain.app",
-    "X-Title": "Second Brain",
-}
+LLM_HEADERS = {}
 
 
 async def generate_summary(text: str, max_tokens: int = 300) -> str:
-    if not settings.openrouter_api_key:
-        raise RuntimeError("OpenRouter API key not configured")
+    if not settings.llm_api_key:
+        raise RuntimeError("LLM API key not configured")
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"{settings.openrouter_base_url}/chat/completions",
+            f"{settings.llm_base_url}/chat/completions",
             headers={
-                "Authorization": f"Bearer {settings.openrouter_api_key}",
-                **OPENROUTER_HEADERS,
+                "Authorization": f"Bearer {settings.llm_api_key}",
+                **LLM_HEADERS,
             },
             json={
-                "model": settings.openrouter_model,
+                "model": settings.llm_model,
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant that writes concise document summaries."},
                     {"role": "user", "content": f"Summarize the following document in {max_tokens} tokens or less:\n\n{text[:8000]}"},
@@ -289,17 +286,17 @@ async def generate_summary(text: str, max_tokens: int = 300) -> str:
 
 
 async def generate_tags(text: str, max_tokens: int = 100) -> list[str]:
-    if not settings.openrouter_api_key:
-        raise RuntimeError("OpenRouter API key not configured")
+    if not settings.llm_api_key:
+        raise RuntimeError("LLM API key not configured")
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"{settings.openrouter_base_url}/chat/completions",
+            f"{settings.llm_base_url}/chat/completions",
             headers={
-                "Authorization": f"Bearer {settings.openrouter_api_key}",
-                **OPENROUTER_HEADERS,
+                "Authorization": f"Bearer {settings.llm_api_key}",
+                **LLM_HEADERS,
             },
             json={
-                "model": settings.openrouter_model,
+                "model": settings.llm_model,
                 "messages": [
                     {"role": "system", "content": "Generate 3-5 relevant tags for the given document. Return only a comma-separated list, no markdown, no numbering."},
                     {"role": "user", "content": f"Document:\n\n{text[:4000]}"},
@@ -316,17 +313,17 @@ async def generate_tags(text: str, max_tokens: int = 100) -> list[str]:
 
 
 async def generate_keywords(text: str, max_tokens: int = 100) -> list[str]:
-    if not settings.openrouter_api_key:
-        raise RuntimeError("OpenRouter API key not configured")
+    if not settings.llm_api_key:
+        raise RuntimeError("LLM API key not configured")
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"{settings.openrouter_base_url}/chat/completions",
+            f"{settings.llm_base_url}/chat/completions",
             headers={
-                "Authorization": f"Bearer {settings.openrouter_api_key}",
-                **OPENROUTER_HEADERS,
+                "Authorization": f"Bearer {settings.llm_api_key}",
+                **LLM_HEADERS,
             },
             json={
-                "model": settings.openrouter_model,
+                "model": settings.llm_model,
                 "messages": [
                     {"role": "system", "content": "Extract 5-10 key terms or phrases from the document. Return only a comma-separated list, no markdown, no numbering."},
                     {"role": "user", "content": f"Document:\n\n{text[:4000]}"},

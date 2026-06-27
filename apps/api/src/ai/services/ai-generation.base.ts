@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OpenRouterProvider } from '../../chat/providers/openrouter.provider';
+import { LlmProvider } from '../../chat/providers/llm-provider.interface';
 import { PrismaService } from '../../shared/services/prisma.service';
 import { ContentService } from './content.service';
 import { AiPromptBuilderService } from './ai-prompt-builder.service';
@@ -11,7 +11,7 @@ import { ChatMessage } from '../../chat/providers/llm-provider.interface';
 @Injectable()
 export abstract class AiGenerationBaseService {
   constructor(
-    protected readonly llmProvider: OpenRouterProvider,
+    @Inject('LLM_PROVIDER') protected readonly llmProvider: LlmProvider,
     protected readonly prisma: PrismaService,
     protected readonly contentService: ContentService,
     protected readonly promptBuilder: AiPromptBuilderService,
@@ -20,7 +20,7 @@ export abstract class AiGenerationBaseService {
   ) {}
 
   protected getDefaultModel(): string {
-    return this.config.get<string>('OPENROUTER_MODEL', 'google/gemma-4-31b-it:free');
+    return this.config.get<string>('LLM_MODEL', 'google/gemma-4-31b-it:free');
   }
 
   abstract readonly type: GeneratedContentType;
