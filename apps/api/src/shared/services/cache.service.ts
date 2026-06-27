@@ -1,18 +1,16 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
+import { REDIS_CLIENT } from '../shared.module';
 
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
-  private readonly client: Redis;
   private readonly defaultTtl: number;
 
-  constructor(config: ConfigService) {
-    this.client = new Redis({
-      host: config.get('REDIS_HOST', 'localhost'),
-      port: Number(config.get('REDIS_PORT', '6379')),
-      keyPrefix: 'cache:',
-    });
+  constructor(
+    @Inject(REDIS_CLIENT) private readonly client: Redis,
+    config: ConfigService,
+  ) {
     this.defaultTtl = Number(config.get('CACHE_TTL', '300'));
   }
 
