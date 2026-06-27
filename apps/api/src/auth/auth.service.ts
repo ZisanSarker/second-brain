@@ -172,13 +172,22 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
+    const response: Record<string, string> = {
+      message: 'If the email exists, a reset link has been sent.',
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+      return response;
+    }
+
+    // Development-only password reset flow
+    // Production requires a dedicated ResetToken model with expiry
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
-    // Always return success to avoid email enumeration
     if (!user) {
-      return { message: 'If the email exists, a reset link has been sent.' };
+      return response;
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -187,16 +196,12 @@ export class AuthService {
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        passwordHash: tokenHash, // We'll need a dedicated ResetToken model for production
+        passwordHash: tokenHash,
       },
     });
 
-    // Future: send email with reset link containing token
-    return {
-      message: 'If the email exists, a reset link has been sent.',
-      // TODO: Remove in production — temporary for development
-      resetToken: token,
-    };
+    response.resetToken = token;
+    return response;
   }
 
   async resetPassword(dto: ResetPasswordDto) {
