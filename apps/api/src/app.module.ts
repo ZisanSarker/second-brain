@@ -24,8 +24,14 @@ import { RecentModule } from './recent/recent.module';
 import { SearchModule } from './search/search.module';
 import { ChatModule } from './chat/chat.module';
 import { AiModule } from './ai/ai.module';
-import { AutomationModule } from './automation/automation.module';
+import { CollabModule } from './collab/collab.module';
+import { CommentsModule } from './comments/comments.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ActivityModule } from './activity/activity.module';
+import { AuditModule } from './audit/audit.module';
+import { PresenceModule } from './presence/presence.module';
+import { SharingModule } from './sharing/sharing.module';
+import { AutomationModule } from './automation/automation.module';
 import { SettingsModule } from './settings/settings.module';
 import { JobsModule } from './jobs/jobs.module';
 import { SharedModule } from './shared/shared.module';
@@ -69,8 +75,15 @@ import { SharedModule } from './shared/shared.module';
     SearchModule,
     ChatModule,
     AiModule,
-    AutomationModule,
+    CollabModule,
+    CommentsModule,
     NotificationsModule,
+    ActivityModule,
+    AuditModule,
+    PresenceModule,
+    SharingModule,
+    TeamsModule,
+    AutomationModule,
     SettingsModule,
     JobsModule,
     SharedModule,

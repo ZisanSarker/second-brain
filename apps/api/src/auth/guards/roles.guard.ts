@@ -1,17 +1,10 @@
 import { Injectable, CanActivate, ExecutionContext, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../shared/services/prisma.service';
+import { ROLE_HIERARCHY } from '../../shared/constants/role-hierarchy';
 
 export const ROLES_KEY = 'roles';
 export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
-
-const ROLE_HIERARCHY: Record<string, number> = {
-  OWNER: 100,
-  ADMIN: 80,
-  EDITOR: 60,
-  MEMBER: 40,
-  VIEWER: 20,
-};
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -32,7 +25,7 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.id;
-    const workspaceId = request.params?.workspaceId;
+    const workspaceId = request.headers['x-workspace-id'] || request.params?.workspaceId;
 
     if (!userId || !workspaceId) {
       return false;
