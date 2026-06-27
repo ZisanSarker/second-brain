@@ -115,6 +115,10 @@ export interface Document {
   pageCount?: number | null;
   wordCount?: number | null;
   readingTime?: number | null;
+  processingStatus?: string | null;
+  parsingStatus?: string | null;
+  embeddingStatus?: string | null;
+  indexStatus?: string | null;
   lastAccessedAt?: string | null;
   createdAt: string;
   updatedAt: string;

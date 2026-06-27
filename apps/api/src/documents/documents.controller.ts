@@ -147,6 +147,26 @@ export class DocumentsController {
     return this.documents.restoreVersion(workspaceId, id, parseInt(versionNumber), userId);
   }
 
+  @Get('documents/:id/processing')
+  @ApiOperation({ summary: 'Get document processing status' })
+  getProcessingStatus(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.documents.getProcessingStatus(workspaceId, id, userId);
+  }
+
+  @Post('documents/:id/retry')
+  @ApiOperation({ summary: 'Retry document processing' })
+  retryProcessing(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.documents.retryProcessing(workspaceId, id, userId);
+  }
+
   @Post('documents/:id/tags')
   @ApiOperation({ summary: 'Assign tags to document' })
   assignTags(

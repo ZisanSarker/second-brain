@@ -45,6 +45,25 @@ services:
     volumes:
       - minio_data:/data
 
+  ai-service:
+    build:
+      context: ./apps/ai
+      dockerfile: Dockerfile
+    container_name: secondbrain_ai
+    restart: always
+    ports:
+      - '8000:8000'
+    environment:
+      PORT: '8000'
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: '6333'
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4o}
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+    depends_on:
+      - qdrant
+      - redis
+
 volumes:
   postgres_data:
   redis_data:

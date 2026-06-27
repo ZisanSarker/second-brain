@@ -16,6 +16,10 @@ import {
   Tag,
   SlidersHorizontal,
   X,
+  Globe,
+  GitBranch,
+  Video,
+  ChevronDown,
 } from 'lucide-react';
 import { useDocuments } from '@/lib/hooks/useDocuments';
 import { useCollections } from '@/lib/hooks/useCollections';
@@ -65,8 +69,49 @@ function formatDate(dateStr?: string | null) {
   });
 }
 
+function statusBadge(status?: string | null) {
+  if (!status || status === 'COMPLETED' || status === 'READY') return null;
+  const colors: Record<string, { bg: string; text: string; dot: string }> = {
+    PENDING: { bg: 'bg-slate-800/60', text: 'text-slate-400', dot: 'bg-slate-500' },
+    PENDING_UPLOAD: { bg: 'bg-slate-800/60', text: 'text-slate-400', dot: 'bg-slate-500' },
+    QUEUED: { bg: 'bg-blue-900/30', text: 'text-blue-400', dot: 'bg-blue-400' },
+    PROCESSING: {
+      bg: 'bg-amber-900/30',
+      text: 'text-amber-400',
+      dot: 'bg-amber-400 animate-pulse',
+    },
+    EXTRACTING: {
+      bg: 'bg-amber-900/30',
+      text: 'text-amber-400',
+      dot: 'bg-amber-400 animate-pulse',
+    },
+    CHUNKING: { bg: 'bg-amber-900/30', text: 'text-amber-400', dot: 'bg-amber-400 animate-pulse' },
+    EMBEDDING: {
+      bg: 'bg-purple-900/30',
+      text: 'text-purple-400',
+      dot: 'bg-purple-400 animate-pulse',
+    },
+    INDEXING: {
+      bg: 'bg-purple-900/30',
+      text: 'text-purple-400',
+      dot: 'bg-purple-400 animate-pulse',
+    },
+    FAILED: { bg: 'bg-red-900/30', text: 'text-red-400', dot: 'bg-red-400' },
+  };
+  const c = colors[status] || colors.PENDING;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md ${c.bg} text-[10px] font-medium ${c.text}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+      {status}
+    </span>
+  );
+}
+
 function DocumentCard({ doc }: { doc: Document }) {
   const Icon = getFileIcon(doc.fileType);
+  const processingStatus = doc.processingStatus || (doc.status !== 'READY' ? doc.status : null);
   return (
     <Link href={`/documents/${doc.id}`}>
       <div className="glass-panel rounded-xl border border-slate-800/60 p-4 h-full glass-panel-hover cursor-pointer group">
@@ -80,6 +125,7 @@ function DocumentCard({ doc }: { doc: Document }) {
                 {doc.fileType}
               </span>
             )}
+            {statusBadge(processingStatus)}
             <button
               type="button"
               className="p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-800/50"
@@ -148,6 +194,7 @@ function LoadingSkeleton() {
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [importOpen, setImportOpen] = useState(false);
   const [collectionFilter, setCollectionFilter] = useState('');
   const [folderFilter, setFolderFilter] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState('');
@@ -186,12 +233,57 @@ export default function DocumentsPage() {
           <FileText className="h-5 w-5 text-indigo-400" />
           <h1 className="text-sm font-semibold text-slate-200">Documents</h1>
         </div>
-        <Link
-          href="/upload"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
-        >
-          <span>Upload</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setImportOpen(!importOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-all"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              Import
+              <ChevronDown
+                className={`h-3 w-3 transition-transform ${importOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {importOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setImportOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 z-20 glass-panel rounded-xl py-1 border border-slate-700/50 min-w-[180px]">
+                  <Link
+                    href="/imports/website"
+                    onClick={() => setImportOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
+                  >
+                    <Globe className="h-4 w-4 text-blue-400" />
+                    Website
+                  </Link>
+                  <Link
+                    href="/imports/github"
+                    onClick={() => setImportOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
+                  >
+                    <GitBranch className="h-4 w-4 text-slate-400" />
+                    GitHub Repo
+                  </Link>
+                  <Link
+                    href="/imports/youtube"
+                    onClick={() => setImportOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 transition-colors"
+                  >
+                    <Video className="h-4 w-4 text-red-400" />
+                    YouTube
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+          <Link
+            href="/upload"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all"
+          >
+            <span>Upload</span>
+          </Link>
+        </div>
       </header>
 
       <div className="p-6 flex-1 overflow-auto space-y-6">

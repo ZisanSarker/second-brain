@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../shared/services/prisma.service';
 import { StorageService } from '../shared/services/storage.service';
+import { QueueService } from '../jobs/queue.service';
 import {
   CreateDocumentDto,
   UpdateDocumentDto,
@@ -23,6 +24,7 @@ export class DocumentsService {
   constructor(
     private prisma: PrismaService,
     private storage: StorageService,
+    private queue: QueueService,
   ) {}
 
   async create(userId: string, workspaceId: string, dto: CreateDocumentDto) {
@@ -57,7 +59,14 @@ export class DocumentsService {
           },
         },
       },
-      include: DOCUMENT_INCLUDE,
+      include: {
+        ...DOCUMENT_INCLUDE,
+        versions: {
+          orderBy: { versionNumber: 'desc' },
+          take: 1,
+          select: { id: true, versionNumber: true },
+        },
+      },
     });
 
     // Move file from uploads/ to documents/ if storageKey exists
@@ -76,6 +85,15 @@ export class DocumentsService {
       } catch {
         // File may already have been moved or uploaded directly
       }
+    }
+
+    // Enqueue document processing if there is content to process
+    if (dto.fileType && dto.fileType !== 'link') {
+      this.queue
+        .enqueueProcessDocument(document.id, workspaceId, document.versions[0].id)
+        .catch((err) => {
+          // Don't fail the create if enqueue fails
+        });
     }
 
     return document;
@@ -354,6 +372,61 @@ export class DocumentsService {
         tags: { select: { id: true, name: true, color: true } },
       },
     });
+  }
+
+  async getProcessingStatus(workspaceId: string, documentId: string, userId: string) {
+    await this.requireWorkspaceDocument(workspaceId, documentId, userId);
+
+    const doc = await this.prisma.document.findUnique({
+      where: { id: documentId },
+      select: {
+        id: true,
+        status: true,
+        processingStatus: true,
+        parsingStatus: true,
+        embeddingStatus: true,
+        indexStatus: true,
+      },
+    });
+
+    const jobs = await this.prisma.backgroundJob.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    return { document: doc, recentJobs: jobs };
+  }
+
+  async retryProcessing(workspaceId: string, documentId: string, userId: string) {
+    await this.requireEditAccess(workspaceId, documentId, userId);
+
+    const doc = await this.prisma.document.findUnique({
+      where: { id: documentId },
+      select: { id: true, versionNumber: true },
+    });
+    if (!doc) throw new NotFoundException('Document not found');
+
+    const version = await this.prisma.documentVersion.findFirst({
+      where: { documentId, versionNumber: doc.versionNumber },
+      select: { id: true },
+    });
+
+    await this.prisma.document.update({
+      where: { id: documentId },
+      data: {
+        processingStatus: 'PENDING',
+        parsingStatus: 'PENDING',
+        embeddingStatus: 'PENDING',
+        indexStatus: 'PENDING',
+      },
+    });
+
+    if (version) {
+      await this.queue.enqueueProcessDocument(documentId, workspaceId, version.id);
+    }
+
+    return { message: 'Processing retry queued' };
   }
 
   async getPresignedUrl(workspaceId: string, storageKey: string) {

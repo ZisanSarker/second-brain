@@ -133,3 +133,27 @@ export function useDownloadUrl() {
     mutationFn: (id: string) => documentsApi.getDownloadUrl(id),
   });
 }
+
+export function useProcessingStatus(id: string) {
+  return useQuery({
+    queryKey: ['documents', id, 'processing'],
+    queryFn: () => documentsApi.getProcessingStatus(id),
+    enabled: !!id,
+    refetchInterval: (query) => {
+      const data = query.state.data?.document as { processingStatus?: string } | undefined;
+      if (!data) return 3000;
+      if (data.processingStatus === 'COMPLETED' || data.processingStatus === 'FAILED') return false;
+      return 3000;
+    },
+  });
+}
+
+export function useRetryProcessing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => documentsApi.retryProcessing(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+}

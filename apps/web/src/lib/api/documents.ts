@@ -54,4 +54,14 @@ export const documentsApi = {
 
   getDownloadUrl: (id: string) =>
     apiClient.get<{ url: string }>(`/documents/${id}/download`).then((r) => r.data),
+
+  getProcessingStatus: (id: string) =>
+    apiClient
+      .get<{
+        document: Record<string, unknown>;
+        recentJobs: unknown[];
+      }>(`/documents/${id}/processing`)
+      .then((r) => r.data),
+
+  retryProcessing: (id: string) => apiClient.post(`/documents/${id}/retry`).then((r) => r.data),
 };

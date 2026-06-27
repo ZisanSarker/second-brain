@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../shared/services/prisma.service';
 import { StorageService } from '../shared/services/storage.service';
+import { QueueService } from '../jobs/queue.service';
 import { DocumentsService } from './documents.service';
 
 describe('DocumentsService', () => {
@@ -42,6 +43,18 @@ describe('DocumentsService', () => {
     deleteObject: jest.fn(),
   };
 
+  const mockQueue = {
+    enqueueProcessDocument: jest.fn().mockResolvedValue('job-1'),
+    enqueueReprocessDocument: jest.fn().mockResolvedValue('job-1'),
+    enqueueDeleteVectors: jest.fn().mockResolvedValue('job-1'),
+    enqueueWebsiteImport: jest.fn().mockResolvedValue('job-1'),
+    enqueueGitHubImport: jest.fn().mockResolvedValue('job-1'),
+    enqueueYouTubeImport: jest.fn().mockResolvedValue('job-1'),
+    enqueueGenerateSummary: jest.fn().mockResolvedValue('job-1'),
+    enqueueGenerateTags: jest.fn().mockResolvedValue('job-1'),
+    enqueueGenerateKeywords: jest.fn().mockResolvedValue('job-1'),
+  };
+
   const memberFixture = { id: 'member-1', workspaceId: 'ws-1', userId: 'user-1', role: 'MEMBER' };
   const editorFixture = { id: 'member-2', workspaceId: 'ws-1', userId: 'user-1', role: 'EDITOR' };
   const viewerFixture = { id: 'member-3', workspaceId: 'ws-1', userId: 'user-1', role: 'VIEWER' };
@@ -69,6 +82,7 @@ describe('DocumentsService', () => {
         DocumentsService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: StorageService, useValue: mockStorage },
+        { provide: QueueService, useValue: mockQueue },
       ],
     }).compile();
 
@@ -96,6 +110,7 @@ describe('DocumentsService', () => {
         ...docFixture,
         tags: [],
         _count: { versions: 1, comments: 0 },
+        versions: [{ id: 'ver-1', versionNumber: 1 }],
       });
       mockStorage.moveToPermanent.mockResolvedValue('documents/ws-1/doc-1/v1/key.pdf');
       mockPrisma.documentVersion.updateMany.mockResolvedValue({ count: 1 });
@@ -129,6 +144,7 @@ describe('DocumentsService', () => {
         ...docFixture,
         tags: [],
         _count: { versions: 1, comments: 0 },
+        versions: [{ id: 'ver-1', versionNumber: 1 }],
       });
 
       await service.create('user-1', 'ws-1', dto);
@@ -142,6 +158,7 @@ describe('DocumentsService', () => {
         ...docFixture,
         tags: [],
         _count: { versions: 1, comments: 0 },
+        versions: [{ id: 'ver-1', versionNumber: 1 }],
       });
 
       const result = await service.create('user-1', 'ws-1', dtoNoKey);

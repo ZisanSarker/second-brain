@@ -33,6 +33,8 @@ import {
   useRestoreVersion,
   useDownloadUrl,
   useUpdateDocument,
+  useProcessingStatus,
+  useRetryProcessing,
 } from '@/lib/hooks/useDocuments';
 import { useRemoveTag } from '@/lib/hooks/useDocuments';
 import type { DocumentVersion } from '@second-brain/types';
@@ -125,6 +127,8 @@ export default function DocumentDetailPage() {
   const restoreVersion = useRestoreVersion();
   const downloadUrl = useDownloadUrl();
   const removeTag = useRemoveTag();
+  const { data: processing } = useProcessingStatus(id);
+  const retryProcessing = useRetryProcessing();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -411,6 +415,81 @@ export default function DocumentDetailPage() {
                     {tag.name}
                   </span>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Processing Status */}
+          {processing?.document && (
+            <div className="glass-panel rounded-xl border border-slate-800/60 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Processing Status
+                </h2>
+                {(processing.document as { processingStatus?: string }).processingStatus ===
+                  'FAILED' && (
+                  <button
+                    onClick={() => retryProcessing.mutate(id)}
+                    disabled={retryProcessing.isPending}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 text-[11px] font-medium text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                  >
+                    Retry
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {(
+                  ['processingStatus', 'parsingStatus', 'embeddingStatus', 'indexStatus'] as const
+                ).map((key) => {
+                  const value =
+                    (processing.document as Record<string, string | undefined>)[key] || 'PENDING';
+                  const isActive =
+                    value === 'PROCESSING' ||
+                    value === 'EXTRACTING' ||
+                    value === 'CHUNKING' ||
+                    value === 'EMBEDDING' ||
+                    value === 'INDEXING';
+                  const isDone = value === 'COMPLETED';
+                  const isFailed = value === 'FAILED';
+                  const labels: Record<string, string> = {
+                    processingStatus: 'Overall',
+                    parsingStatus: 'Extraction',
+                    embeddingStatus: 'Embedding',
+                    indexStatus: 'Indexing',
+                  };
+                  return (
+                    <div
+                      key={key}
+                      className={`p-3 rounded-xl border text-center ${
+                        isDone
+                          ? 'bg-green-500/5 border-green-500/20'
+                          : isFailed
+                            ? 'bg-red-500/5 border-red-500/20'
+                            : isActive
+                              ? 'bg-amber-500/5 border-amber-500/20'
+                              : 'bg-slate-900/30 border-slate-800/30'
+                      }`}
+                    >
+                      <p className="text-[10px] font-medium text-slate-500 mb-1">{labels[key]}</p>
+                      <span
+                        className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                          isDone
+                            ? 'text-green-400'
+                            : isFailed
+                              ? 'text-red-400'
+                              : isActive
+                                ? 'text-amber-400'
+                                : 'text-slate-500'
+                        }`}
+                      >
+                        {isActive && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        )}
+                        {value}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
